@@ -673,6 +673,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1112100115}
   - component: {fileID: 1112100114}
+  - component: {fileID: 1112100116}
   m_Layer: 0
   m_Name: Background
   m_TagString: Untagged
@@ -753,6 +754,54 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1112100116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1112100113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70bcf1ddce9440d41bd35438464043c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StarSpawner2D
+  prefabs:
+  - prefab: {fileID: 667728351172476507, guid: 060db713b7dd6cd4fbf05012a0e63c3e, type: 3}
+    weight: 1
+    minScale: 0.2
+    maxScale: 0.2
+  - prefab: {fileID: 9049408840758446056, guid: a5c03b769db9b834797c032414c02d4f, type: 3}
+    weight: 4
+    minScale: 0.1
+    maxScale: 0.1
+  - prefab: {fileID: 6722864116137655883, guid: 2e5d04b396c528d4387fb415e4809dfb, type: 3}
+    weight: 3
+    minScale: 0.1
+    maxScale: 0.1
+  - prefab: {fileID: 5450420090517490925, guid: f22ff7454e8d86345ba1b2258c8bdb5f, type: 3}
+    weight: 0.5
+    minScale: 0.5
+    maxScale: 0.5
+  - prefab: {fileID: 8923132505169362318, guid: 4a606dbdbc968ea4f8ddc1001dec2765, type: 3}
+    weight: 6
+    minScale: 0.05
+    maxScale: 0.05
+  - prefab: {fileID: 1285832739757115104, guid: f641d0ce03c89bb47bbeb0be9849c8d6, type: 3}
+    weight: 6
+    minScale: 0.05
+    maxScale: 0.05
+  starsParent: {fileID: 1112100115}
+  areaSprite: {fileID: 1112100114}
+  areaBox: {fileID: 0}
+  useSpriteBounds: 1
+  count: 60
+  minDistance: 0.4
+  alphaRange: {x: 0.5, y: 1}
+  addTwinkle: 1
+  twinkleProbability: 0.6
+  twinkleAmplitudeRange: {x: 0.1, y: 0.2}
+  twinkleSpeedRange: {x: 0.4, y: 0.8}
 --- !u!1 &1254625607
 GameObject:
   m_ObjectHideFlags: 0
@@ -924,7 +973,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1057891191
   m_SortingLayer: -2
-  m_SortingOrder: 0
+  m_SortingOrder: 4
   m_Sprite: {fileID: 21300000, guid: 08429ed47795f0841a766b987e132484, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -996,7 +1045,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
