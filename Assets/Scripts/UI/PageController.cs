@@ -3,7 +3,6 @@ using UnityEngine;
 
 /// <summary>
 /// Simple page switcher: activates exactly one child page at a time.
-/// Place on PageRoot, then either press 'Collect Pages From Children'
 /// or assign pages manually in the Inspector.
 /// </summary>
 [DisallowMultipleComponent]

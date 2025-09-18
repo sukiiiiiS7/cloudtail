@@ -156,10 +156,10 @@ public class InventoryPager : MonoBehaviour
 
                 if (icon)
                 {
-                    // 绑定 sprite
+                    
                     icon.iconOverride = s;
 
-                    // ★ 下发 per-item UI 微调（来自 prefab 上的 ItemIconHint）
+                    
                     if (useItemHints && prefab)
                     {
                         var hint = prefab.GetComponent<ItemIconHint>();
@@ -199,7 +199,6 @@ public class InventoryPager : MonoBehaviour
             }
         }
 
-        // 通知（给页码点之类的）
         OnPageChanged?.Invoke(page, PageCount);
     }
 }

@@ -1,7 +1,6 @@
 using UnityEngine;
 
 /// Optional per-prefab placement overrides.
-/// Attach to a prefab (e.g. cloud) if you need custom alignment or offset.
 public class PlacementProfile : MonoBehaviour
 {
     [Header("Alignment override")]

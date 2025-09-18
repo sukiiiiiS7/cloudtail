@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8640258955966967389}
   - component: {fileID: 758123880890918371}
   - component: {fileID: 8605253977791617016}
+  - component: {fileID: 5393846832245062206}
   m_Layer: 0
   m_Name: purple_mushroom
   m_TagString: Untagged
@@ -105,3 +106,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemIconHint
   nudgePixels: {x: -15, y: -13}
   scaleMul: 1
+--- !u!114 &5393846832245062206
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5776707130641475612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b94f09797848ede4c99db28c447389cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlacementProfile
+  forceCenter: 1
+  forceBottomOnGround: 0
+  extraNudgePx: {x: 0, y: 0}
