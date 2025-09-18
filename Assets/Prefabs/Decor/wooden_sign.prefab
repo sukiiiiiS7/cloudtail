@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2727917065107223819}
   - component: {fileID: 6113400819646772165}
   - component: {fileID: 3853374219208626215}
+  - component: {fileID: 2606144099950668136}
   m_Layer: 0
   m_Name: wooden_sign
   m_TagString: Untagged
@@ -79,7 +80,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: -1057891191
   m_SortingLayer: -2
-  m_SortingOrder: 5
+  m_SortingOrder: 6
   m_Sprite: {fileID: 21300000, guid: a9099f41075756847b6fb4746fa66717, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -105,3 +106,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemIconHint
   nudgePixels: {x: -85, y: 170}
   scaleMul: 1
+--- !u!114 &2606144099950668136
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5480985292150090635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b94f09797848ede4c99db28c447389cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlacementProfile
+  forceCenter: 1
+  forceBottomOnGround: 0
+  extraNudgePx: {x: 0, y: 0}

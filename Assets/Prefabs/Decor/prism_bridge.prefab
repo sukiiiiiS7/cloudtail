@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8487821026967797423}
   - component: {fileID: 2277104120351756276}
   - component: {fileID: 8874757817979224310}
+  - component: {fileID: 2540118807831262680}
   m_Layer: 0
   m_Name: prism_bridge
   m_TagString: Untagged
@@ -105,3 +106,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemIconHint
   nudgePixels: {x: -70, y: -60}
   scaleMul: 1
+--- !u!114 &2540118807831262680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4834121149757143918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b94f09797848ede4c99db28c447389cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlacementProfile
+  forceCenter: 1
+  forceBottomOnGround: 0
+  extraNudgePx: {x: 0, y: 0}

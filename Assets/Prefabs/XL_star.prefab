@@ -223,7 +223,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StarTwinkle2D
   target: {fileID: 0}
-  baseAlpha: 0.46
+  baseAlpha: 0.541
   amplitude: 0.2
   speed: 0.5
   randomizeOnEnable: 1

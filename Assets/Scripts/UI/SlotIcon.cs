@@ -1,8 +1,8 @@
 using UnityEngine;
 
 /// Minimal, stable SlotIcon (manual-first + per-item tweaks).
-/// - You hand-place each Icon once in the scene; we won't auto-center.
-/// - Base size = your manual scale (captured as baseline).
+/// - hand-place each Icon once in the scene.
+/// - Base size = manual scale (captured as baseline).
 /// - Per-item overrides (nudge/scaleMul) come from ItemIconHint on the item prefab.
 /// - If Lock Scale is ON: size = baseline * scaleMul (so hints still work).
 /// - If Lock Scale is OFF: size = autoFit(boxSize) * scaleMul.
@@ -46,7 +46,7 @@ public class SlotIcon : MonoBehaviour
     private SpriteRenderer sr;
     private DecorSlot decorSlot;
 
-    // baselines captured from your scene edits (so we never accumulate)
+    // baselines captured from scene edits 
     private Vector3 baselineLocalPos;
     private float   baselineUniformScale = 1f;
 
@@ -57,9 +57,9 @@ public class SlotIcon : MonoBehaviour
         sr.sortingLayerName = sortingLayerName;
         sr.sortingOrder = sortingOrder;
 
-        // capture your manual baselines
+        // capture  manual baselines
         baselineLocalPos = transform.localPosition;
-        baselineUniformScale = transform.localScale.x; // we assume uniform scale for icons
+        baselineUniformScale = transform.localScale.x; //  assume uniform scale for icons
         if (baselineUniformScale <= 0f) baselineUniformScale = 1f;
     }
 
@@ -72,7 +72,7 @@ public class SlotIcon : MonoBehaviour
         sr.sortingLayerName = sortingLayerName;
         sr.sortingOrder = sortingOrder;
 
-        // if you tweak in editor, recapture baselines
+        // if  tweak in editor, recapture baselines
         baselineLocalPos = transform.localPosition;
         baselineUniformScale = transform.localScale.x > 0f ? transform.localScale.x : 1f;
 
@@ -107,7 +107,7 @@ public class SlotIcon : MonoBehaviour
 
         if (lockScale)
         {
-            // keep your manual baseline scale, still allow per-item scaleMul
+            // keep  manual baseline scale, still allow per-item scaleMul
             scaleTarget = baselineUniformScale * Mathf.Max(0.0001f, overrideScaleMul <= 0f ? 1f : overrideScaleMul);
         }
         else
@@ -129,7 +129,7 @@ public class SlotIcon : MonoBehaviour
 
         transform.localScale = new Vector3(scaleTarget, scaleTarget, 1f);
 
-        // 3) position = your baseline + per-item pixel nudge (no accumulation)
+        // 3) position = baseline + per-item pixel nudge (no accumulation)
         Vector3 pos = baselineLocalPos;
         if (overrideNudgePixels != Vector2.zero)
         {
@@ -140,14 +140,14 @@ public class SlotIcon : MonoBehaviour
         if (lockPosition)
             transform.localPosition = pos;
         else
-            transform.localPosition = pos; // minimal: still use baseline+nudge; we don't auto-center
+            transform.localPosition = pos; 
 
         // 4) sorting
         sr.sortingLayerName = sortingLayerName;
         sr.sortingOrder = sortingOrder;
     }
 
-    // When you change manual placement/size in scene, call this (or toggle the component) to recapture.
+    
     public void RegrabBaselines()
     {
         baselineLocalPos = transform.localPosition;

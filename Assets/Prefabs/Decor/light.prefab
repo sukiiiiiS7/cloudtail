@@ -10,6 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 386948850784522441}
   - component: {fileID: 9181015506545357796}
+  - component: {fileID: 8296101373597872357}
+  - component: {fileID: 438563768632262598}
   m_Layer: 0
   m_Name: light
   m_TagString: Untagged
@@ -90,3 +92,40 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &8296101373597872357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3199185167947969527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b94f09797848ede4c99db28c447389cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlacementProfile
+  forceCenter: 1
+  forceBottomOnGround: 0
+  extraNudgePx: {x: 0, y: 0}
+--- !u!114 &438563768632262598
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3199185167947969527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3a83ba3951321d48a01802165dbd430, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DecorGlow2D
+  autoCreate: 1
+  light2D: {fileID: 0}
+  color: {r: 1, g: 0.78431374, b: 0.3529412, a: 1}
+  intensity: 1.4
+  outerRadius: 1.2
+  innerRadius: 0.18
+  offset: {x: 0, y: 0.05}
+  flicker: 1
+  flickerAmount: 0.12
+  flickerSpeed: 2.2
