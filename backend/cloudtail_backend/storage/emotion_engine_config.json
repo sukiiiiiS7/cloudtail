@@ -1,0 +1,27 @@
+{
+  "model_name": "bhadresh-savani/distilbert-base-uncased-emotion",
+  "label_mapping": {
+    "joy": "gratitude",
+    "sadness": "sadness",
+    "anger": "guilt",
+    "love": "nostalgia",
+    "fear": "guilt"
+  },
+  "element_table": {
+    "sadness": "CrystalShard",
+    "guilt": "RustIngot",
+    "gratitude": "LightDust",
+    "nostalgia": "EchoBloom",
+    "peace": "SoftOrb"
+  },
+  "bonus_rules": {
+    "guilt": {
+      "keywords": ["sorry"],
+      "bonus": 0.1
+    },
+    "nostalgia": {
+      "keywords": ["sunset", "home", "beach", "smell"],
+      "bonus": 0.1
+    }
+  }
+}

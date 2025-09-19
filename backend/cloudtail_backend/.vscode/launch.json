@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Emotion Engine",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "cloudtail_backend.engine.emotion_engine",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "args": [],
+      "console": "integratedTerminal"
+    }
+  ]
+}

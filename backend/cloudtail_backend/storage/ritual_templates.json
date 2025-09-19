@@ -1,0 +1,86 @@
+[
+  {
+    "ritual_id": "farewell_drift",
+    "ritual_type": "farewell",
+    "emotion_path": ["grief", "sorrow"],
+    "required_state": "grief",
+    "emotional_tone": "gentle_release",
+    "suitability_for": ["initial detachment", "for those who feel stuck"],
+    "script": [
+      {"action": "fold", "object": "memory_paper", "line": "Fold the moment with care."},
+      {"action": "release", "object": "paper_boat", "line": "Let it drift away."},
+      {"action": "watch", "object": "horizon", "line": "And stay until it fades."}
+    ],
+    "effect_tags": ["release", "farewell"]
+  },
+  {
+    "ritual_id": "echo_bloom",
+    "ritual_type": "honor",
+    "emotion_path": ["nostalgia", "peace"],
+    "required_state": "neutral",
+    "emotional_tone": "reflection_and_growth",
+    "suitability_for": ["early-stage recovery"],
+    "script": [
+      {"action": "plant", "object": "echo_seed", "line": "From memory, we root the bloom."},
+      {"action": "water", "object": "memory_root", "line": "Each tear a seed of something new."},
+      {"action": "grow", "object": "bloom_light", "line": "Let the past glow gently in the now."}
+    ],
+    "effect_tags": ["remembrance", "growth"]
+  },
+  {
+    "ritual_id": "ashes_to_light",
+    "ritual_type": "rebirth",
+    "emotion_path": ["grief", "nostalgia", "hope"],
+    "required_state": "rebirth",
+    "emotional_tone": "gentle_transition",
+    "suitability_for": ["after prolonged grief"],
+    "script": [
+      {"action": "burn", "object": "memory_shard", "line": "Let it become ash."},
+      {"action": "scatter", "object": "ash", "line": "To the winds of remembrance."},
+      {"action": "ignite", "object": "sky_flame", "line": "Light the path forward."}
+    ],
+    "effect_tags": ["cleansing", "transition", "rebirth"]
+  },
+  {
+    "ritual_id": "soft_sanctuary",
+    "ritual_type": "comfort",
+    "emotion_path": ["sadness", "grief"],
+    "required_state": "grief",
+    "emotional_tone": "soothing",
+    "suitability_for": ["overwhelmed state", "low emotional energy"],
+    "script": [
+      {"action": "wrap", "object": "blanket_of_light", "line": "Surround yourself in safety."},
+      {"action": "breathe", "object": "quiet_rhythm", "line": "Let your breath soften the weight."},
+      {"action": "rest", "object": "starfield", "line": "Be still beneath the stars."}
+    ],
+    "effect_tags": ["soothing", "restoration"]
+  },
+  {
+    "ritual_id": "mirror_words",
+    "ritual_type": "dialogue",
+    "emotion_path": ["longing", "grief", "ambivalence"],
+    "required_state": "neutral",
+    "emotional_tone": "introspective_connection",
+    "suitability_for": ["those needing to 'speak again'", "ambiguous loss"],
+    "script": [
+      {"action": "write", "object": "mirror_page", "line": "Say what was left unsaid."},
+      {"action": "reflect", "object": "mirror", "line": "Read it as if they answered."},
+      {"action": "fold", "object": "note", "line": "Keep it with you for now."}
+    ],
+    "effect_tags": ["dialogue", "processing"]
+  },
+  {
+    "ritual_id": "ember_shift",
+    "ritual_type": "transformation",
+    "emotion_path": ["anger", "regret", "acceptance"],
+    "required_state": "rebirth",
+    "emotional_tone": "alchemy",
+    "suitability_for": ["users with volatile or unresolved emotions"],
+    "script": [
+      {"action": "strike", "object": "core_stone", "line": "Name what hurts."},
+      {"action": "heat", "object": "ember_core", "line": "Let it burn, but don't let it break you."},
+      {"action": "forge", "object": "symbolic_token", "line": "Now shape it into something new."}
+    ],
+    "effect_tags": ["transformative", "release", "reclaim"]
+  }
+]

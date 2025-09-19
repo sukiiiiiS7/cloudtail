@@ -1,0 +1,38 @@
+{
+  "emotion_essence_map": {
+    "光尘": "LightDust",
+    "锈铁锭": "RustIngot",
+    "水晶碎片": "CrystalShard",
+    "悲伤": "Sadness",
+    "怀念": "Nostalgia",
+    "愧疚": "Guilt",
+    "感恩": "Gratitude",
+    "平静": "Peace"
+  },
+  "memory_keywords_map": {
+    "沙滩": "Beach",
+    "镜子": "Mirror",
+    "项圈": "Collar",
+    "脚印": "Footprint",
+    "铃铛": "Bell"
+  },
+  "crafted_items": {
+    "Footprint Wind Chime": ["LightDust", "Beach"],
+    "Mirror of Regret": ["RustIngot", "Mirror"]
+  },
+  "firefly_script_templates": [
+    "Tonight, the memory of {keyword} will light the sky.",
+    "With {essence}, another part of you returns to the stars.",
+    "Your grief has shaped a place: the {item_name} now hangs in the wind.",
+    "Your emotion {emotion} has crystallised into {element}.",
+    "You left behind a memory of {keyword}. It echoes in the ritual."
+  ],
+  "visual_effect_tags": {
+    "LightDust": ["glow", "particles", "aura"],
+    "RustIngot": ["rust", "cracks", "echo"],
+    "CrystalShard": ["shards", "light_refraction", "tremble"],
+    "Gratitude": ["warmth", "sunbeam", "bloom"],
+    "Sadness": ["rain", "mist", "slow_fade"],
+    "Nostalgia": ["sepia", "flicker", "soft_noise"]
+  }
+}
