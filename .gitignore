@@ -14,3 +14,10 @@ MemoryCaptures/
 
 # OS
 .DS_Store
+
+# backend python ignores
+backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
+backend/**/*.pyc
+backend/**/.DS_Store

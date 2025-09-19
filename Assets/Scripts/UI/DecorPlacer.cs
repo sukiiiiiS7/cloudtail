@@ -2,36 +2,66 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-/// Places selected decoration prefabs onto a 2D world surface.
-/// - Call Select(prefab) from UI (inventory slots) to choose what to place.
-/// - Left click on a collider in placementMask to spawn it under decorRoot.
-/// - Right click a placed item to delete (by tag "Decor" OR being child of decorRoot).
+/// Places selected decoration prefabs onto 2D placement surfaces.
+/// - UI calls Select(prefab) to choose what to place.
+/// - Left click -> spawn under decorRoot at exact screen point (Screen→World + OverlapPoint).
+/// - Right click -> delete a spawned item (under decorRoot or optional tag).
+///
+/// Features:
+/// - Alignment: Center or Bottom-on-Ground (Alt can invert per click)
+/// - Unified sorting for all child SpriteRenderers
+/// - Pixel snap & pixel nudge (px → world via PPU)
+/// - Optional UI blocking (UGUI ray + collider layer)
 [DisallowMultipleComponent]
 public class DecorPlacer : MonoBehaviour
 {
     public static DecorPlacer Instance { get; private set; }
 
-    [Header("Scene wiring")]
-    public Camera cam;                  // leave None; auto-fills at runtime
-    public Transform decorRoot;         // parent for spawned items (e.g., "DecorRoot")
-    public LayerMask placementMask;     // e.g., only "World" layer
+    public enum AlignMode { Center, BottomOnGround }
 
-    [Header("Pixel snapping")]
+    [Header("Scene wiring")]
+    public Camera cam;                      // auto-fill MainCamera if empty
+    public Transform decorRoot;             // parent for spawned items
+    public LayerMask placementMask;         // layers allowed for placing (e.g., World)
+
+    [Header("Placement alignment")]
+    [Tooltip("Default alignment when placing items.")]
+    public AlignMode alignMode = AlignMode.Center;
+    [Tooltip("Considered 'ground' when using BottomOnGround.")]
+    public LayerMask groundLayers;
+    [Tooltip("Hold Alt to invert current alignment just for this click.")]
+    public bool allowAltToInvert = true;
+
+    [Header("Pixel tuning")]
+    [Tooltip("Art Pixels Per Unit.")]
     public float pixelsPerUnit = 128f;
     public bool snapToPixelGrid = true;
+    [Tooltip("Extra pixel nudge applied after alignment (X,Y in pixels). +Y is up.")]
+    public Vector2 pixelNudge = Vector2.zero;
 
-    [Header("Rendering defaults for spawned items")]
+    [Header("Rendering defaults")]
     public string sortingLayerName = "World";
-    public int sortingOrder = 5;
+    public int sortingOrder = 20;
 
-    GameObject currentPrefab;
+    [Header("UI blocking")]
+    public bool blockUI = true;             // block when pointer over UGUI or UI colliders
+    public bool blockUGUI = false;          
+    public LayerMask uiBlockMask = 0;       // optional (UI colliders)
+
+    [Header("Spawn tag (optional)")]
+    public bool assignTag = false;
+    public string assignTagName = "Decor";
+
+    [Header("Debug")]
+    public bool debugLog = false;
+    public bool debugHUD = false;
+
+    private GameObject currentPrefab;
 
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(this); return; }
         Instance = this;
-
-        if (!Application.isPlaying) return;
 
         if (!cam) cam = Camera.main;
         if (!decorRoot)
@@ -39,74 +69,192 @@ public class DecorPlacer : MonoBehaviour
             var found = GameObject.Find("DecorRoot");
             if (found) decorRoot = found.transform;
         }
-        if (placementMask.value == 0)
-            placementMask = LayerMask.GetMask("World"); // safe default
+        if (placementMask.value == 0) placementMask = LayerMask.GetMask("World");
+        if (groundLayers.value == 0) groundLayers = LayerMask.GetMask("World");
     }
 
-    /// Select which prefab to place next.
-    public void Select(GameObject prefab) => currentPrefab = prefab;
+    public void Select(GameObject prefab)
+    {
+        currentPrefab = prefab;
+        if (debugLog) Debug.Log("[Placer] Selected: " + (prefab ? prefab.name : "<null>"));
+    }
 
     void Update()
     {
-        if (!Application.isPlaying || currentPrefab == null || cam == null) return;
-
+        if (currentPrefab == null || cam == null) return;
         var mouse = Mouse.current;
         if (mouse == null) return;
 
-        // Ignore when pointer is over UI.
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-            return;
-
-        float zDist = Mathf.Abs(cam.transform.position.z);
-
-        // Left click -> place
-        if (mouse.leftButton.wasPressedThisFrame)
+        // UI block
+        if (blockUI)
         {
-            Vector2 screen = mouse.position.ReadValue();
-            Vector3 wp = cam.ScreenToWorldPoint(new Vector3(screen.x, screen.y, zDist));
-            Vector2 p = wp;
+            if (blockUGUI && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                return;
 
-            var hit = Physics2D.OverlapPoint(p, placementMask);
-            if (hit) PlaceAt(p);
-        }
-
-        // Right click -> delete (optional)
-        if (mouse.rightButton.wasPressedThisFrame)
-        {
-            Vector2 screen = mouse.position.ReadValue();
-            Vector3 wp = cam.ScreenToWorldPoint(new Vector3(screen.x, screen.y, zDist));
-            var hitCol = Physics2D.OverlapPoint(wp, ~0);
-            if (hitCol)
+            if (uiBlockMask.value != 0)
             {
-                bool isDecor =
-                    hitCol.CompareTag("Decor") ||
-                    (decorRoot && hitCol.transform.IsChildOf(decorRoot));
-                if (isDecor) Destroy(hitCol.gameObject);
+                float z = Mathf.Abs(cam.transform.position.z);
+                Vector2 sp = mouse.position.ReadValue();
+                Vector3 wp = cam.ScreenToWorldPoint(new Vector3(sp.x, sp.y, z));
+                var uiCols = Physics2D.OverlapPointAll(wp, uiBlockMask);
+                if (uiCols != null && uiCols.Length > 0) return;
             }
         }
+
+        // LEFT → place (Screen→World + OverlapPoint exact detection)
+        if (mouse.leftButton.wasPressedThisFrame)
+        {
+            float z = Mathf.Abs(cam.transform.position.z);
+            Vector2 sp = mouse.position.ReadValue();
+            Vector3 wp = cam.ScreenToWorldPoint(new Vector3(sp.x, sp.y, z));
+
+            // pick the first collider under cursor that is in placementMask
+            Collider2D hitCol = null;
+            var cols = Physics2D.OverlapPointAll(wp);
+            for (int i = 0; i < cols.Length; i++)
+            {
+                var c = cols[i];
+                if (IsLayerInMask(placementMask, c.gameObject.layer)) { hitCol = c; break; }
+            }
+
+            if (hitCol != null)
+                PlaceAt(wp, hitCol); // use exact world point under cursor
+        }
+
+        // RIGHT → delete
+        if (mouse.rightButton.wasPressedThisFrame)
+        {
+            float z = Mathf.Abs(cam.transform.position.z);
+            Vector2 sp = mouse.position.ReadValue();
+            Vector3 wp = cam.ScreenToWorldPoint(new Vector3(sp.x, sp.y, z));
+
+            var hitCol = Physics2D.OverlapPoint(wp, ~0);
+            if (!hitCol) return;
+
+            bool isDecor = (decorRoot && hitCol.transform.IsChildOf(decorRoot));
+            if (!isDecor && assignTag && !string.IsNullOrEmpty(assignTagName))
+            {
+                try { isDecor = hitCol.CompareTag(assignTagName); } catch { isDecor = false; }
+            }
+            if (isDecor) Destroy(hitCol.gameObject);
+        }
     }
 
-    void PlaceAt(Vector2 pos)
+    /// Hard-align to visible geometry (combined SpriteRenderer.bounds), not prefab root.
+    void PlaceAt(Vector2 hitPoint, Collider2D surface)
     {
-        Vector3 target = new Vector3(pos.x, pos.y, 0f);
+        // 1) Decide alignment for this click (Alt inverts)
+        AlignMode effectiveAlign = alignMode;
+        if (allowAltToInvert && Keyboard.current != null && Keyboard.current.altKey.isPressed)
+            effectiveAlign = (alignMode == AlignMode.Center) ? AlignMode.BottomOnGround : AlignMode.Center;
+
+        // 2) Spawn at the hit point (temporary)
+        Vector3 pos = new Vector3(hitPoint.x, hitPoint.y, 0f);
+        var go = Instantiate(currentPrefab, pos, Quaternion.identity, decorRoot ? decorRoot : null);
+
+        // 3) Normalize SR sorting
+        var srs = go.GetComponentsInChildren<SpriteRenderer>(true);
+        foreach (var r in srs)
+        {
+            if (!string.IsNullOrEmpty(sortingLayerName)) r.sortingLayerName = sortingLayerName;
+            r.sortingOrder = sortingOrder;
+        }
+
+        // 4) Combined visible bounds
+        bool hasBounds = false;
+        Bounds cb = default;
+        for (int i = 0; i < srs.Length; i++)
+        {
+            var r = srs[i];
+            if (r && r.enabled && r.sprite)
+            {
+                if (!hasBounds) { cb = r.bounds; hasBounds = true; }
+                else cb.Encapsulate(r.bounds);
+            }
+        }
+
+        // 5) Hard alignment (center or bottom)
+        if (hasBounds)
+        {
+            bool isGround = IsLayerInMask(groundLayers, surface.gameObject.layer);
+
+            if (effectiveAlign == AlignMode.BottomOnGround && isGround)
+            {
+                // align bottom edge (cb.min.y) to click Y; keep click X
+                float dy = hitPoint.y - cb.min.y;
+                pos = go.transform.position + new Vector3(0f, dy, 0f);
+            }
+            else
+            {
+                // align visible center to click point (X and Y)
+                Vector3 delta = new Vector3(hitPoint.x - cb.center.x, hitPoint.y - cb.center.y, 0f);
+                pos = go.transform.position + delta;
+            }
+
+            go.transform.position = pos;
+        }
+
+        // 6) Pixel nudge (px → world)
+        if (pixelNudge != Vector2.zero)
+        {
+            float ppu = Mathf.Max(1f, pixelsPerUnit);
+            go.transform.position += new Vector3(pixelNudge.x / ppu, pixelNudge.y / ppu, 0f);
+            pos = go.transform.position;
+        }
+
+        // 7) Snap to pixel grid (last)
         if (snapToPixelGrid && pixelsPerUnit > 0f)
         {
-            target.x = Mathf.Round(target.x * pixelsPerUnit) / pixelsPerUnit;
-            target.y = Mathf.Round(target.y * pixelsPerUnit) / pixelsPerUnit;
+            float ppu = pixelsPerUnit;
+            var p = go.transform.position;
+            p.x = Mathf.Round(p.x * ppu) / ppu;
+            p.y = Mathf.Round(p.y * ppu) / ppu;
+            go.transform.position = p;
+            pos = p;
         }
 
-        var go = Instantiate(currentPrefab, target, Quaternion.identity,
-                             decorRoot ? decorRoot : null);
-
-        var sr = go.GetComponent<SpriteRenderer>();
-        if (sr)
+        // 8) Optional tag
+        if (assignTag && !string.IsNullOrEmpty(assignTagName))
         {
-            if (!string.IsNullOrEmpty(sortingLayerName)) sr.sortingLayerName = sortingLayerName;
-            sr.sortingOrder = sortingOrder;
+            try { go.tag = assignTagName; } catch { /* tag may not exist; ignore */ }
         }
 
-        // Tag is optional; delete logic also checks parent under decorRoot.
-        // Create the "Decor" tag once in Project Settings > Tags if you want to use it.
-        try { go.tag = "Decor"; } catch { /* tag may not exist; ignore */ }
+        if (debugLog)
+        {
+            bool bottom = (effectiveAlign == AlignMode.BottomOnGround);
+            Debug.Log($"[Placer] Spawned {go.name} at {pos} {(bottom ? "(bottom-aligned)" : "(center-aligned)")}.");
+        }
+    }
+
+    void OnGUI()
+    {
+        if (!debugHUD) return;
+        string prefabName = currentPrefab ? currentPrefab.name : "<none>";
+        GUI.Label(new Rect(10, 10, 1400, 22),
+            "Placer | Prefab: " + prefabName +
+            " | Align: " + alignMode +
+            " | Mask: " + MaskNames(placementMask));
+    }
+
+    // -------- helpers --------
+    private static bool IsLayerInMask(LayerMask mask, int layer)
+    {
+        return ((mask.value & (1 << layer)) != 0);
+    }
+
+    private static string MaskNames(LayerMask m)
+    {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+        for (int i = 0; i < 32; i++)
+        {
+            int bit = 1 << i;
+            if ((m.value & bit) != 0)
+            {
+                string n = LayerMask.LayerToName(i);
+                if (!string.IsNullOrEmpty(n)) sb.Append(n).Append('|');
+            }
+        }
+        return sb.Length > 0 ? sb.ToString() : "(none)";
     }
 }
+
