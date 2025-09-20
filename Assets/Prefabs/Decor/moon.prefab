@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 6416537182354265230}
   - component: {fileID: 2373136561389445558}
   - component: {fileID: 629624084951600437}
-  m_Layer: 0
+  - component: {fileID: -4763484709086491147}
+  m_Layer: 3
   m_Name: moon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -129,3 +130,15 @@ MonoBehaviour:
   flicker: 0
   flickerAmount: 0.15
   flickerSpeed: 2
+--- !u!114 &-4763484709086491147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8657386500832774612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3361ac80db40c974abd6227580843d37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlacedDecorAutoRegister

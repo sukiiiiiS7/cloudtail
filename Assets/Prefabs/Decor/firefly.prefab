@@ -14,7 +14,8 @@ GameObject:
   - component: {fileID: 5800161667920233684}
   - component: {fileID: 4988885129279670857}
   - component: {fileID: 1903234073141869278}
-  m_Layer: 0
+  - component: {fileID: 7151319459395795939}
+  m_Layer: 3
   m_Name: firefly
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -161,6 +162,18 @@ MonoBehaviour:
   forceCenter: 1
   forceBottomOnGround: 0
   extraNudgePx: {x: 0, y: 0}
+--- !u!114 &7151319459395795939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3770278467767203572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3361ac80db40c974abd6227580843d37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlacedDecorAutoRegister
 --- !u!1 &4808628743549910111
 GameObject:
   m_ObjectHideFlags: 0
@@ -172,7 +185,7 @@ GameObject:
   - component: {fileID: 132089108254302625}
   - component: {fileID: 1353796562129868801}
   - component: {fileID: 3164375887158222089}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: FireflyLight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
