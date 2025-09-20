@@ -84,6 +84,24 @@ public class PlanetSwitcher : MonoBehaviour
         if (planets.Count == 0) return;
         JumpTo(_index + delta);
     }
+    /// <summary>
+    /// Compatibility shim for external callers (e.g., RecommendClient).
+    /// Accepts any int, wraps to valid range, then delegates to JumpTo().
+    /// No changes to existing switching logic.
+    /// </summary>
+    public void OpenWithSuggestionIndex(int idx)
+    {
+        if (planets == null || planets.Count == 0)
+        {
+            Debug.LogWarning("PlanetSwitcher: no planets configured; suggestion ignored.");
+            return;
+            
+        }
+        // Wrap to list range; preserves negative/overflow indices via Mod().
+        int target = Mod(idx, planets.Count);
+        JumpTo(target);
+    }
+
 
     bool CanSwitch()
     {

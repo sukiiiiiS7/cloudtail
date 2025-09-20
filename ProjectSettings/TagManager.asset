@@ -3,17 +3,19 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - DecorRoot
+  - Decor
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Decor
   - Water
   - UI
+  - Decor
   - World
   - Sky
-  - 
   - 
   - 
   - 

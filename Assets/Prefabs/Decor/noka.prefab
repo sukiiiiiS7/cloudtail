@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 5865071457199045655}
   - component: {fileID: 3948013843634338053}
   - component: {fileID: 3311317822720446382}
-  m_Layer: 6
+  - component: {fileID: 6603784846334422393}
+  m_Layer: 5
   m_Name: noka
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -164,3 +165,16 @@ MonoBehaviour:
   pixelsPerUnit: 128
   rebaseEachApply: 0
   lockLocalPosition: 1
+  setSpriteInAwake: 0
+--- !u!114 &6603784846334422393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1567054848701902288}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57f8c3f45f13bea42a647ec854490fa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DisableColliderWhenModal

@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 758123880890918371}
   - component: {fileID: 8605253977791617016}
   - component: {fileID: 5393846832245062206}
-  m_Layer: 0
+  - component: {fileID: -11692359310893809}
+  m_Layer: 3
   m_Name: purple_mushroom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -121,3 +122,15 @@ MonoBehaviour:
   forceCenter: 1
   forceBottomOnGround: 0
   extraNudgePx: {x: 0, y: 0}
+--- !u!114 &-11692359310893809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5776707130641475612}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3361ac80db40c974abd6227580843d37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlacedDecorAutoRegister
