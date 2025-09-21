@@ -13,14 +13,14 @@ All responses are JSON. Errors follow standard HTTP status semantics.
 | presentation | 8020 | `/api/recommend`, `/planet/status`, `/rituals/*` (stub), `/craft/*` (stub), `/healthz` |
 | full         | 8010 | All of the above **+** `/api/memories/*` |
 
-Note: `/api/memories/*` is **hidden** in presentation builds and visible only on the full profile (8010).
+Note: `/api/memories/*` is **visible only** in the `full` profile (8010). It is hidden in `presentation` (8020).
 
 ---
 
 ## Canonical Contract
 
 - **Emotions**: `sadness`, `guilt`, `nostalgia (longing)`, `gratitude`  
-  (aliases are canonicalized; e.g., `grief/sorrow → sadness`, `hope/acceptance/peace/joy/love → gratitude`)
+  (aliases are canonicalized; e.g., `grief/sorrow → sadness`, `acceptance/peace/hope/joy/love → gratitude`)
 - **Planets**: `rippled` (sadness), `spiral` (guilt), `woven` (nostalgia), `ambered` (gratitude)
 
 ---
@@ -32,9 +32,9 @@ Note: `/api/memories/*` is **hidden** in presentation builds and visible only on
 **Request**
 - Content-Type: `application/json`
 - **Field semantics**
-  - `content`: user-provided raw text (free text)
-  - `text`: optionally pre-normalized text (e.g., whitespace collapse, punctuation compression, alias `miss u|missyou → miss you`)
-  - **Current build**: either field is accepted; **one is sufficient**. Including **both** is valid.
+  - `content` (**required**): user-provided raw text (free text).
+  - `text` *(optional)*: pre-normalized text (e.g., whitespace collapse, punctuation compression, aliasing such as `miss u|missyou → miss you`).
+  - **Current build**: clients **SHOULD** send `content`; including `text` is optional. Sending **both** is compatible and recommended.
 
 **Example**
 ```json
@@ -140,7 +140,13 @@ Returns an array of preview artifacts for the four emotions (status `"planned"`)
 Returns a deterministic ritual descriptor (status `"planned"`).
 
 ### GET `/rituals/recommend` — list rituals (stub)
-Returns a small list of ritual descriptors (status `"planned"`).
+**Response shape (demo stub)** — returns an **array** of ritual descriptors (deterministic). Example:
+```json
+[
+  { "id": "ritual.sample.001", "title": "Evening Light", "status": "planned" },
+  { "id": "ritual.sample.002", "title": "River Stones",   "status": "planned" }
+]
+```
 
 ---
 

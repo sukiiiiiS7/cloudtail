@@ -123,9 +123,9 @@ Swagger: `http://127.0.0.1:8020/docs` (presentation), `http://127.0.0.1:8010/doc
 
 - **POST** `/api/recommend` → `{ planet_key, display_name, emotion, confidence, reason, ... }`  
   **Field semantics (request body)**  
-  - `content`: user-provided raw text (free text).  
-  - `text`: optionally pre-normalized text (e.g., whitespace collapse, alias normalization).  
-  - **Current build behavior**: the backend accepts **either** field; **one is sufficient**. Including **both** is valid and does not raise errors. Clients that do not perform client-side normalization may simply send `content`.
+  - `content` (**required**): user-provided raw text (free text).  
+  - `text` *(optional)*: pre-normalized text (e.g., whitespace collapse, punctuation compression, aliasing such as `miss u|missyou → miss you`).  
+  - **Current build behavior**: clients **SHOULD** send `content`; including `text` is optional. Sending **both** is compatible and recommended.
 
   **Example payload**
   ```json
@@ -136,6 +136,8 @@ Swagger: `http://127.0.0.1:8020/docs` (presentation), `http://127.0.0.1:8010/doc
 - **GET** `/healthz` → liveness + active profile
 - `/api/memories/*` (full only) → CRUD for memory entries
 
+**Full API reference**: `backend/cloudtail_backend/docs/backend_api.md`
+
 ---
 
 ## Reproducibility
@@ -143,7 +145,6 @@ Swagger: `http://127.0.0.1:8020/docs` (presentation), `http://127.0.0.1:8010/doc
 - Procedural notes and the ten-probe snapshot:  
   **[`backend/cloudtail_backend/docs/Reproducibility.md`](backend/cloudtail_backend/docs/Reproducibility.md)**  
   Artifacts: **`backend/cloudtail_backend/docs/probe_results.md`**, **`backend/cloudtail_backend/docs/probe_results.csv`**
-
 
 **Environment fingerprint (record with submission)**
 ```bash
@@ -181,7 +182,7 @@ git rev-parse --short HEAD
 ## Troubleshooting
 
 - `/api/memories/*` absent in Swagger → running in `presentation` profile (expected). Use `full` or switch to `:8010`.
-- All responses look identical → request likely sent to the presentation port (:8020) or the body field name not read; include `"content"` and/or `"text"` in the JSON payload.
+- All responses look identical → request likely sent to the presentation port (:8020) or the body field name not read; include `"content"` (and optionally `"text"`).
 - Swagger not sending → click **Try it out** before **Execute**.
 - Port/profile confusion → confirm via `GET /healthz`.
 
