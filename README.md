@@ -1,4 +1,4 @@
-﻿# Cloudtail — Ritual Sandbox for Pet Loss (Demo Build)
+﻿# Cloudtail — Grief Sandbox for Pet Loss (Demo Build)
 
 Unity front-end + FastAPI backend delivering a ritualized, symbolic sandbox for pet bereavement. Emphasis on **reproducibility**, **transparent limitations**, and **assessor-friendly** documentation.
 
