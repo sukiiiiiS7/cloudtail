@@ -117,6 +117,21 @@ Swagger: `http://127.0.0.1:8020/docs` (presentation), `http://127.0.0.1:8010/doc
 - Sadness → `It still hurts sometimes`
 - Edge case → `missyou!!!` (demonstrates robustness limits)
 
+### Demo snapshots
+
+![healthz 8020](backend/cloudtail_backend/docs/images/screenshots/01_healthz_8020_presentation.png)
+![healthz 8010](backend/cloudtail_backend/docs/images/screenshots/02_healthz_8010_full.png)
+
+![Swagger 8020](backend/cloudtail_backend/docs/images/screenshots/03_swagger_8020_no_memories.png)
+![Swagger 8010](backend/cloudtail_backend/docs/images/screenshots/04_swagger_8010_with_memories.png)
+![Recommend 200](backend/cloudtail_backend/docs/images/screenshots/05_swagger_recommend_200.png)
+
+![Unity gratitude](backend/cloudtail_backend/docs/images/screenshots/06_unity_gratitude.png)
+![Unity edge](backend/cloudtail_backend/docs/images/screenshots/07_unity_edge_guilt.png)
+
+![Planet status](backend/cloudtail_backend/docs/images/screenshots/09_swagger_planet_status.png)
+![Probes](backend/cloudtail_backend/docs/images/screenshots/10_powershell_probes.png)
+
 ---
 
 ## API Surface Used by the Demo
