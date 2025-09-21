@@ -1,54 +1,68 @@
 import os
 os.environ["TRANSFORMERS_NO_TF"] = "1"  # Disable TensorFlow to avoid Keras 3 issues
-print("TF ENV:", os.environ.get("TRANSFORMERS_NO_TF"))
-from transformers import pipeline
 import json
 import logging
 from typing import List
 from ..models.memory import EmotionEssence
 from .emotion_model import EmotionModelWrapper
 
-# Setup logger
+# Configure logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class EmotionAlchemyEngine:
     """
-    A symbolic emotion engine that transforms raw emotion labels
-    into Cloudtail's internal essences used for rituals, crafting, and planetary states.
+    Symbolic emotion engine that maps raw model labels
+    into Cloudtail's canonical four categories and elements.
     """
 
     def __init__(self, model_name: str = "bhadresh-savani/distilbert-base-uncased-emotion"):
         self.model = EmotionModelWrapper(model_name)
 
-        # Label → Internal emotion mapping
+        # Map raw model labels → canonical four types
         self.label_mapping = {
+            # Gratitude-family
             "joy": "gratitude",
+            "love": "gratitude",
+            "hope": "gratitude",
+            "acceptance": "gratitude",
+            "peace": "gratitude",
+
+            # Sadness-family
             "sadness": "sadness",
+            "grief": "sadness",
+            "sorrow": "sadness",
+
+            # Guilt-family
+            "guilt": "guilt",
+            "regret": "guilt",
+            "shame": "guilt",
             "anger": "guilt",
-            "love": "nostalgia",
-            "fear": "guilt"
+            "fear": "guilt",
+
+            # Nostalgia-family
+            "nostalgia": "nostalgia",
+            "longing": "nostalgia",
         }
 
-        # Internal emotion → element mapping
+        # Canonical emotion → element mapping
         self.element_table = {
             "sadness": "CrystalShard",
             "guilt": "RustIngot",
             "gratitude": "LightDust",
             "nostalgia": "EchoBloom",
-            "peace": "SoftOrb"
         }
 
-        # Bonus heuristic rules (optional future expansion)
+        # Bonus heuristics (demo only, optional expansion)
         self.bonus_rules = {
             "guilt": {"keywords": ["sorry"], "bonus": 0.1},
-            "nostalgia": {"keywords": ["sunset", "home", "beach", "smell"], "bonus": 0.1}
+            "nostalgia": {"keywords": ["sunset", "home", "beach", "smell"], "bonus": 0.1},
         }
 
     def extract_emotion(self, text: str) -> EmotionEssence:
         """
-        Analyze a single text and return its structured emotional essence.
+        Analyze one text and return its structured emotional essence.
         """
         try:
             raw_label, confidence = self.model.predict(text)
@@ -65,7 +79,7 @@ class EmotionAlchemyEngine:
             type=emotion_type,
             element=self.get_element(emotion_type),
             effect_tags=self.tag_emotion(emotion_type),
-            value=round(value, 3)
+            value=round(value, 3),
         )
 
     def extract_batch(self, texts: List[str]) -> List[EmotionEssence]:
@@ -77,11 +91,11 @@ class EmotionAlchemyEngine:
 
     def map_to_internal_type(self, label: str) -> str:
         if label not in self.label_mapping:
-            logger.warning(f"Unmapped label [{label}], defaulting to 'peace'")
-        return self.label_mapping.get(label, "peace")
+            logger.warning(f"Unmapped label [{label}], defaulting to 'gratitude'")
+        return self.label_mapping.get(label, "gratitude")
 
     def get_element(self, emotion_type: str) -> str:
-        return self.element_table.get(emotion_type, "SoftOrb")
+        return self.element_table.get(emotion_type, "LightDust")
 
     def tag_emotion(self, emotion_type: str) -> List[str]:
         if emotion_type in ["sadness", "nostalgia"]:
@@ -90,7 +104,7 @@ class EmotionAlchemyEngine:
 
     def calculate_value(self, text: str, emotion_type: str, confidence: float) -> float:
         """
-        Estimate the symbolic strength (value) of the emotion.
+        Estimate symbolic strength (0.0–1.0) of the detected emotion.
         """
         text = text.lower()
         bonus = 0.0
@@ -105,7 +119,7 @@ class EmotionAlchemyEngine:
     @classmethod
     def from_dict(cls, config: dict):
         """
-        Optional future expansion: build engine with user-defined config.
+        Allow future config-driven engine initialization.
         """
         engine = cls(config.get("model_name", "bhadresh-savani/distilbert-base-uncased-emotion"))
         engine.label_mapping = config.get("label_mapping", engine.label_mapping)
@@ -114,9 +128,7 @@ class EmotionAlchemyEngine:
         return engine
 
 
-# ───────────────────────────────
-# Standalone Test Entry
-# ───────────────────────────────
+# Standalone test entry (demo only)
 if __name__ == "__main__":
     with open("cloudtail_backend/storage/emotion_engine_config.json", "r") as f:
         config = json.load(f)
@@ -133,11 +145,10 @@ if __name__ == "__main__":
     batch = [
         "I still remember the sunset when she left.",
         "I miss the sound of her paws on the floor.",
-        "I'm sorry I couldn't do more."
+        "I'm sorry I couldn't do more.",
     ]
     results = engine.extract_batch(batch)
     print("🔹 Batch Results:")
     for i, r in enumerate(results):
         print(f"  {i+1}.", json.dumps(r.__dict__, indent=2))
-
 

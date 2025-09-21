@@ -3,9 +3,9 @@ from datetime import datetime
 from typing import List
 
 class PlanetState(BaseModel):
-    state_tag: str                # High-level label for planet mood/state
-    dominant_emotion: str         # Most frequent emotion in recent history
-    emotion_history: List[str]    # Recent sequence of final emotions
-    color_palette: List[str]      # Suggested colors for visual feedback (hex)
-    visual_theme: str             # Frontend theme identifier (e.g. "rebirth_glow")
-    last_updated: datetime        # Timestamp of last state generation
+    state_tag: str                # One of: sadness | guilt | nostalgia | gratitude
+    dominant_emotion: str         # Mode of recent canonical emotions (same four)
+    emotion_history: List[str]    # Recent sequence (already canonicalized)
+    color_palette: List[str]      # Suggested HEX colors for this state
+    visual_theme: str             # Frontend theme key, e.g. "mist"/"wind"/"clear"/"sepia_memory"
+    last_updated: datetime        # UTC timestamp

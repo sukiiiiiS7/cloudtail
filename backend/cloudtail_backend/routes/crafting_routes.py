@@ -1,50 +1,48 @@
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from typing import Literal
-from cloudtail_backend.services.crafting_engine import (
-    craft_item_from_emotion,
-    preview_all_craftables
-)
+from __future__ import annotations
 
-router = APIRouter()
+from typing import List
+from fastapi import APIRouter
+from ..models.crafting import CraftRequest, CraftResponse, DemoEmotion
 
-#  Request and Response Models
+router = APIRouter(tags=["crafting (stub)"])
 
+# Demo recipes (poster-aligned). No external deps.
+_DEMO_RECIPES = {
+    "sadness":   {"item": "Rain Echo Chime",   "element": "CrystalShard", "mats": ["AshDust"]},
+    "guilt":     {"item": "Mirror of Regret",  "element": "RustIngot",    "mats": ["Tarnish"]},
+    "nostalgia": {"item": "Echo Lantern",      "element": "EchoBloom",    "mats": ["MemoryPetal"]},
+    "gratitude": {"item": "Sun Thread Locket", "element": "LightDust",    "mats": ["WarmGlow"]},
+}
 
-class CraftRequest(BaseModel):
-    emotion_type: Literal[
-        "grief", "nostalgia", "guilt", "peace", "hope", "sadness", "gratitude"
-    ]
-
-
-class CraftResponse(BaseModel):
-    item_name: str
-    element: str
-    materials_used: list[str]
-    effect_tags: list[str]
-    description: str
-
-# POST /craft/
-
-@router.post("/craft/", response_model=CraftResponse)
-def craft_item(request: CraftRequest):
+@router.post("/", response_model=CraftResponse)
+def craft_item(request: CraftRequest) -> CraftResponse:
     """
-    Given an emotion_type, return the first available craftable item
-    synthesized from that emotional element and material set.
+    Stub endpoint: craft a symbolic item from a canonical emotion.
+    Returns status="planned" to indicate this is a poster-aligned stub.
     """
-    result = craft_item_from_emotion(request.emotion_type)
-    if result is None:
-        raise HTTPException(status_code=404, detail="No craftable item found for this emotion.")
-    return result
+    r = _DEMO_RECIPES[request.emotion_type]
+    return CraftResponse(
+        status="planned",
+        item_name=r["item"],
+        element=r["element"],
+        materials_used=r["mats"],
+        effect_tags=["symbolic", request.emotion_type],
+        description=f"A symbolic item crafted from {request.emotion_type} (demo stub).",
+    )
 
-# ----------------------------------------
-# GET /craft/preview
-
-
-@router.get("/craft/preview", response_model=list[CraftResponse])
-def preview_craftables():
+@router.get("/preview", response_model=List[CraftResponse])
+def preview_craftables() -> List[CraftResponse]:
     """
-    Preview all available craftable items, one for each emotion type.
-    Useful for front-end UI, sandbox display, or debugging the config setup.
+    Stub endpoint: preview one example item per canonical emotion.
     """
-    return preview_all_craftables()
+    out: List[CraftResponse] = []
+    for emo, r in _DEMO_RECIPES.items():
+        out.append(CraftResponse(
+            status="planned",
+            item_name=r["item"],
+            element=r["element"],
+            materials_used=r["mats"],
+            effect_tags=["symbolic", emo],
+            description=f"A symbolic item crafted from {emo} (demo stub).",
+        ))
+    return out

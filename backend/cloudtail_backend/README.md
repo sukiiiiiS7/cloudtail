@@ -1,9 +1,19 @@
-
 # Cloudtail Backend
 
-> A grief ritual engine for memory alchemy, pet loss, and planetary evolution.
+> Memory → Emotion → Planet. A creative grief support backend powering the Unity demo.
 
-This is the backend service for **Cloudtail**, a creative system that transforms memories into emotional essences and rituals, enabling users to build their own evolving grief planets.
+This service turns free-text memories into **four canonical emotions** and maps them to **four planets** for the Unity visualization.
+Ritual and Crafting are **poster-aligned stubs** in the demo build (return example JSON with `status:"planned"`).
+
+---
+
+## Demo Scope
+
+* **Implemented**: memories (optional), emotion extraction, planet status, text-to-planet recommendation.
+* **Stubs (poster-aligned)**: `/rituals/*` and `/craft/*` return example data with `status:"planned"`.
+* **Canonical emotions**: `sadness`, `guilt`, `nostalgia`, `gratitude`
+  (`peace / acceptance / hope / joy / love` → **merged** into `gratitude`).
+* **Planets**: `rippled` (sadness), `spiral` (guilt), `woven` (nostalgia), `ambered` (gratitude).
 
 ---
 
@@ -11,440 +21,195 @@ This is the backend service for **Cloudtail**, a creative system that transforms
 
 ```
 cloudtail-backend/
-├── models/                # Core data models
-│   ├── memory.py
-│   ├── planet.py
-│   ├── crafting.py
-│   └── ritual.py
-├── routes/                # API endpoints
-│   ├── memory_routes.py
-│   ├── crafting_routes.py
-│   ├── planet_routes.py
-│   └── ritual_routes.py
-├── services/              # Core logic modules
-│   ├── emotion_model.py
-│   ├── emotion_engine.py
-│   ├── emotion_extractor.py
+├── models/
+│   ├── memory.py          # MemoryEntry, EmotionEssence (labels canonicalized to 4 emotions)
+│   └── planet.py          # PlanetState (schema used by /planet)
+├── engine/
+│   ├── emotion_model.py   # HF pipeline wrapper (CPU/PyTorch)
+│   ├── emotion_engine.py  # Raw → canonical mapping (→ four emotions)
+│   └── planet_engine.py   # Recent emotions → planet state
+├── routes/
+│   ├── memory_routes.py   # (full profile) memory read/write
+│   ├── planet_routes.py   # /planet, /planet/status
+│   ├── recommend_routes.py# /api/recommend (no DB)
+│   ├── ritual_routes.py   # (stub) poster-aligned examples
+│   └── crafting_routes.py # (stub) poster-aligned examples
+├── storage/
+│   ├── data.json                  # tiny seed (optional)
+│   └── emotion_engine_config.json # mapping/config (no 'peace' output)
+├── utils/
+│   └── logging_utils.py
+├── legacy/               # Archived prototypes (not imported in demo build)
 │   ├── crafting_engine.py
+│   ├── emotion_extractor.py
 │   └── ritual_generator.py
-├── storage/               # Local data (JSON-based)
-│   ├── data.json
-│   ├── cloudtail_config.json
-│   ├── emotion_engine_config.json
-│   └── ritual_templates.json
 ├── main.py
-├── requirements.txt
-└── README.md
+└── requirements.txt
 ```
 
+**Notes on legacy prototypes**
+`backend/cloudtail_backend/legacy/` keeps early prototypes that relied on external JSON templates/configs. They are **not imported** by the demo build.
+The final artefact uses:
 
----
-## Module Overview
-
-### models/
-| File | Purpose |
-|------|---------|
-| `memory.py` | Defines `MemoryEntry` and emotion structure for grief inputs. |
-| `planet.py` | Holds the `PlanetState` schema and evolution conditions. |
-| `crafting.py` | Describes `EmotionEssence` and crafting logic schemas. |
-| `ritual.py` | Defines schema for ritual request/response payloads. |
-
-### routes/
-| File | Purpose |
-|------|---------|
-| `memory_routes.py` | API endpoint to submit memories and extract emotions. |
-| `crafting_routes.py` | Accepts emotion elements or keywords and returns crafted commemorative items. |
-| `planet_routes.py` | Returns and updates current planet status based on user interaction. |
-| `ritual_routes.py` | Generates ritual scripts and performances based on grief state. |
-| `crafting_routes.py` | Accepts emotion types and returns crafted symbolic items or previews available combinations. |
-
-
-### services/
-| File | Purpose |
-|------|---------|
-| `emotion_model.py` | Wraps the HuggingFace model and ensures config alignment. |
-| `emotion_engine.py` | Core inference logic with mapping + heuristic bonus logic. |
-| `emotion_extractor.py` | Parses and sanitizes text into usable inputs. |
-| `crafting_engine.py` | Matches crafting inputs with predefined or generated outputs. |
-| `ritual_generator.py` | Generates ritual scripts based on emotional context and history. |
-
-### storage/
-| File | Purpose |
-|------|---------|
-| `data.json` | Local simulation of database for storing user memory and state. |
-| `cloudtail_config.json` | Mapping table for emotion→element→tag logic. |
-| `emotion_engine_config.json` | Internal config file for symbolic emotion mapping. |
-| `ritual_templates.json` | Predefined ritual templates with emotion paths and state conditions. |
+* `engine/` for emotion extraction (canonical four emotions), and
+* stub routes for `/rituals/*` and `/craft/*` aligned with the poster.
 
 ---
 
-## GET `/planet/status`
-
-Returns the **current grief planet state** based on recent memory emotions.  
-The state is inferred from the last 5 memory entries, using `manual_override` if available, otherwise `detected_emotion`.
-
----
-
-### Response Schema: `PlanetState`
-
-| Field              | Type         | Description                                                             |
-|--------------------|--------------|-------------------------------------------------------------------------|
-| `state_tag`        | `str`        | High-level planet state (e.g. "grief", "hope", "nostalgia")             |
-| `dominant_emotion` | `str`        | Most frequent emotion in the recent memory path                         |
-| `emotion_history`  | `List[str]`  | Final emotions of the last 5 memory entries (manual override preferred) |
-| `color_palette`    | `List[str]`  | Suggested hex color palette for visual rendering                        |
-| `visual_theme`     | `str`        | Front-end theme identifier (e.g. "ashen", "rebirth_glow")               |
-| `last_updated`     | `datetime`   | Timestamp of last generation                                            |
-
----
-
-### Request Body
-
-```json
-{
-  "emotion_path": ["grief", "nostalgia", "hope"],
-  "current_state": "rebirth"
-}
-```
-
-### Response Body
-
-```json
-{
-  "ritual_id": "ashes_to_light",
-  "script": [
-    {
-      "action": "burn",
-      "object": "memory_shard",
-      "line": "Let it become ash."
-    },
-    {
-      "action": "scatter",
-      "object": "ash",
-      "line": "To the winds of remembrance."
-    },
-    {
-      "action": "ignite",
-      "object": "sky_flame",
-      "line": "Light the path forward."
-    }
-  ],
-  "effect_tags": ["cleansing", "transition", "rebirth"]
-}
-```
-
----
-
-###  Ethics Layer: Soft Guard
-
-- A built-in safety check ensures we **don’t trigger “hopeful” rituals** if the user is still deep in grief.
-- Logic:
-  - If last 2 emotions are `"grief"` and ritual requires `"hope"`: ❌ skip.
-  - Fallback to a more neutral ritual or return `None`.
-
-```python
-def is_user_ready_for_transition(emotion_path: list[str]) -> bool:
-    grief_ratio = emotion_path.count("grief") / len(emotion_path)
-    return grief_ratio < 0.5
-```
-
-Used in `ritual_generator.py` to **filter templates** before rendering.
-
-
----
-
-## EmotionAlchemyEngine
-
-`emotion_engine.py` defines a symbolic emotion inference module that transforms user memory texts into internal types used across crafting, rituals, and planetary responses.
-
-### Model
-
-- **Model**: [`bhadresh-savani/distilbert-base-uncased-emotion`](https://huggingface.co/bhadresh-savani/distilbert-base-uncased-emotion)
-- **Task**: `text-classification`
-- **Label Mapping**:
-
-| Raw Label | Mapped Type |
-|-----------|-------------|
-| `joy`     | `gratitude` |
-| `sadness` | `sadness`   |
-| `anger`   | `guilt`     |
-| `love`    | `nostalgia` |
-| `fear`    | `guilt`     |
-| _other_   | `peace`     |
-
-Model wrapper and pipeline setup are handled in `emotion_model.py`.
-
-### Output: `EmotionEssence`
-
-Each extracted result returns a symbolic essence object like:
-
-```json
-{
-  "type": "nostalgia",
-  "element": "EchoBloom",
-  "effect_tags": ["ritual", "memory"],
-  "value": 0.84
-}
-```
-
-- `type`: internal emotion type for Cloudtail logic  
-- `element`: material used in crafting (e.g., `RustIngot`, `LightDust`, `CrystalShard`)  
-- `effect_tags`: tags for ritual logic or item behavior  
-- `value`: symbolic emotion intensity, adjusted from model confidence + heuristics  
-
-### Heuristics
-
-- Value is computed as `0.2 + confidence + bonus`, capped at `1.0`
-- Bonuses:
-  - `+0.1` if `"sorry"` in guilt-related memory
-  - `+0.1` if nostalgic keywords like `"sunset"`, `"home"`, `"beach"`, `"smell"` appear
-
-### Batch Testing (Optional)
-
-To test the engine standalone:
+## Run
 
 ```bash
-python -m cloudtail_backend.engine.emotion_engine
+# Presentation profile (no DB required)
+# Windows PowerShell:
+$env:CLOUDTAIL_PROFILE="presentation"
+uvicorn backend.cloudtail_backend.main:app --reload
+# Visit:
+#   http://127.0.0.1:8000/healthz
+#   http://127.0.0.1:8000/planet/status
 ```
 
-Example Output:
-
-```
-INFO:__main__:Extracted [sadness] → [sadness], confidence=0.855
-🔹 Batch Results:
-  1. sadness → CrystalShard (value: 1.0)
-  2. guilt → RustIngot (value: 0.688)
-  3. sadness → CrystalShard (value: 1.0)
-```
-
-### Notes
-
-- Must disable TensorFlow backend to avoid Keras 3 issues:
-  ```python
-  os.environ["TRANSFORMERS_NO_TF"] = "1"
-  ```
-- Located in: `cloudtail_backend/services/emotion_engine.py`
-- Used by: `memory_routes.py`, `crafting_engine.py`, and future ritual modules
-
----
-## Emotion Override Logic (`manual_override`)
-
-In the Cloudtail system, each memory (`MemoryEntry`) includes two emotion fields:
-
-| Field              | Source             | Usage                                     |
-|-------------------|--------------------|-------------------------------------------|
-| `detected_emotion` | Inferred by model   | Default for planetary evolution, rituals  |
-| `manual_override`  | User-specified (optional) | **Takes priority** over detected_emotion |
+Optional **full** profile (needs MongoDB & connection string) enables `/api/memories/*`.
 
 ---
 
-### Emotion Priority Logic
+## Endpoints
 
-In all downstream logic that consumes emotion, the following logic should be used:
+### GET `/healthz`
 
-```python
-emotion = memory.manual_override or memory.detected_emotion
+Health probe.
+
+```json
+{ "ok": true, "profile": "presentation", "version": "1.0.0-four-planets" }
 ```
 
-If the user provides `manual_override`, it will override the model's prediction.
+### GET `/version`
 
----
+Service version.
 
-### Example: Planetary Evolution
-
-```python
-for memory in all_memories:
-    emotion = memory.manual_override or memory.detected_emotion
-    update_planet_state(emotion)
+```json
+{ "version": "1.0.0-four-planets" }
 ```
 
----
+### GET `/planet/status`
 
-### PATCH Endpoint Summary
+Returns the **current planet state**. In presentation mode it reads a small local preview or a safe default; in full mode it derives from recent memories.
 
-The `PATCH /memories/{memory_id}` endpoint supports updating the following fields:
+#### Response schema: `PlanetState`
 
-| Field             | Type              | Purpose                                  |
-|------------------|-------------------|------------------------------------------|
-| `manual_override` | `str | None`      | Override the model-inferred emotion type |
-| `is_private`       | `bool | None`     | Marks memory as excluded from public evolution |
-| `keywords`         | `list[str] | None` | Tags for filtering, searching, or narrative replay |
+| Field              | Type        | Description                                                               |       |           |              |
+| ------------------ | ----------- | ------------------------------------------------------------------------- | ----- | --------- | ------------ |
+| `state_tag`        | `str`       | High-level state (one of: \`sadness                                       | guilt | nostalgia | gratitude\`) |
+| `dominant_emotion` | `str`       | Dominant canonical emotion among recent entries (same four)               |       |           |              |
+| `emotion_history`  | `List[str]` | Recent canonicalized emotions (manual overrides preferred when available) |       |           |              |
+| `color_palette`    | `List[str]` | Suggested hex colors                                                      |       |           |              |
+| `visual_theme`     | `str`       | Client theme id (e.g., `mist`, `wind`, `clear`, `sepia_memory`)           |       |           |              |
+| `last_updated`     | `datetime`  | UTC timestamp                                                             |       |           |              |
 
----
-
-✅ **Note**: If a memory has `is_private = true`, it should be excluded from planetary evolution logic.
-
-Use: `if not memory.is_private:` in relevant loops.
-
-## ✅ Development Log
-
-### 2025-07-17
-
-- ✅ Designed and implemented memory upload flow: `POST /memories/`
-- ✅ Built emotion extraction and alchemy mapping (`EmotionEssence`)
-- ✅ Implemented simple crafting engine: `POST /craft/`
-- ✅ Implemented planetary state system: `GET /planet/`
-- ✅ Created config file `cloudtail_config.json` for emotion-element mapping
-- ✅ Added README and project structure tracking
-- ✅ Emotion model and engine refactored to support symbolic mapping
-
-> Next steps:  
-> 🔜 Ritual scripting module  
-> 🔜 Planet visual evolution logic  
-> 🔜 User/pet profile endpoints  
+> Contract guard: any alias (e.g., `grief/sorrow → sadness`, `hope/acceptance/peace/joy/love → gratitude`) is **canonicalized** before returning.
 
 ---
 
-## 🛠 Development Notes
+### POST `/api/recommend`
 
-### Memory Storage Format
+Text → top emotions (canonical) → planet key.
 
-The file `cloudtail_backend/storage/data.json` stores all uploaded memory entries.
+**Request**
 
-- It must be a valid **JSON array** (`[]`) at all times.
-- Each entry is a `dict` with keys like `id`, `content`, `timestamp`, etc.
-- If this file gets corrupted or accidentally edited as a single object (i.e. `{...}`), the `/memories/` POST route will raise a `500 Internal Server Error` due to `json.decoder.JSONDecodeError`.
+```json
+{ "text": "I still remember the sunset when she left." }
+```
 
-✅ **To fix:**
-Reset `data.json` to `[]` and restart the server.
-
----
-## GET `/planet/status`
-
-Returns the **current grief planet state** based on recent memory emotions.  
-The state is inferred from the last 5 memory entries, using `manual_override` if available, otherwise `detected_emotion`.
-
-This interface powers the **planet evolution system**, enabling emotional visualization and ritual feedback.
-
----
-
-### ✅ Response Schema: `PlanetState`
-
-| Field              | Type         | Description                                                             |
-|--------------------|--------------|-------------------------------------------------------------------------|
-| `state_tag`        | `str`        | High-level planet state (e.g. "grief", "hope", "nostalgia")             |
-| `dominant_emotion` | `str`        | Most frequent emotion in the recent memory path                         |
-| `emotion_history`  | `List[str]`  | Final emotions of the last 5 memory entries (manual override preferred) |
-| `color_palette`    | `List[str]`  | Suggested hex color palette for visual rendering                        |
-| `visual_theme`     | `str`        | Front-end theme identifier (e.g. "ashen", "rebirth_glow")               |
-| `last_updated`     | `datetime`   | Timestamp of last generation                                            |
-
----
-
-### Example Response
+**Response (example)**
 
 ```json
 {
-  "state_tag": "grief",
-  "dominant_emotion": "grief",
-  "emotion_history": ["grief", "grief", "grief", "grief", "grief"],
-  "color_palette": ["#3E3E72", "#5B5B99"],
-  "visual_theme": "ashen",
-  "last_updated": "2025-07-18T14:41:57.537408"
+  "topEmotions": [
+    { "label": "nostalgia", "score": 0.84 },
+    { "label": "sadness",  "score": 0.61 }
+  ],
+  "planet_key": "woven"   // ambered|rippled|spiral|woven
 }
 ```
----
 
-###  Inference Logic
+**Mapping (aliases → planet)**
 
-The system considers the 5 most recent memory entries.
-
-If a memory has manual_override, it takes precedence over detected_emotion.
-
-state_tag and visual_theme are derived from the dominant emotion.
-
-Planet evolution logic is powered by planet_engine.py.
-
-### Related Endpoints
-
-- [`POST /memories/`](#post-memories-upload-memory): Upload a new memory  
-- [`PATCH /memories/{id}`](#patch-memoriesmemory_id-update-memory): Override emotion manually  
-- [`POST /ritual/perform`](#post-ritualperform-upcoming): Trigger a ritual based on current state *(upcoming)*
-**Used by**: front-end visual rendering layer, ritual engine, memory threading system.
+* **gratitude-family → ambered**
+  `gratitude, joy, love, hope, acceptance, peace, calm, trust, contentment, empathy, warmth, pride, compassion`
+* **sadness-family → rippled**
+  `sadness, grief, sorrow, melancholy`
+* **guilt-family → spiral**
+  `guilt, regret, shame, anger, fear, frustration`
+* **nostalgia-family → woven**
+  `nostalgia, longing`
 
 ---
-# Methodology Notes
 
-## 1. Emotion Inference (Engine)
+### (Full profile) `/api/memories/*`
 
-- Based on symbolic mapping (configurable)
-- Uses manual override if available
-- Final emotion used for downstream logic (planet, rituals, threading)
+Memory CRUD and manual overrides (optional feature for evaluation / debugging).
 
-## 2. Planet State Inference
+* `POST /api/memories/` – add a memory → triggers emotion extraction
+* `GET /api/memories/` – list
+* `PATCH /api/memories/{id}` – supports `manual_override`, `is_private`, `keywords`
 
-- Aggregates recent 5 final emotions
-- Strategy: majority voting → dominant → visual mapping
-- Inspired by symbolic ritual transformation + collective mood
+**Override precedence**
 
-## 3. Ritual Generation (Planned)
+```python
+final = memory.manual_override or memory.detected_emotion
+# The chosen label is then canonicalized to one of the four categories before returning.
+```
 
-- Inputs: emotion path + current state
-- Output: script (action + dialogue), effect_tags
-- Will use predefined templates + soft variation logic
-
-...
-
-
-## Notes
-
-- This project prioritises **symbolic ritual**, **emotional pacing**, and **non-linear grief**.  
-- Architecture follows a modular and extensible design for creative expansion (procedural animation, emotion-based simulation, etc.)
+`is_private = true` memories are excluded from planet inference.
 
 ---
-### Emotion → Ritual Flow
-graph TD
-    A[User Memory Input] --> B[EmotionAlchemyEngine]
-    B --> C[EmotionEssence]
-    C --> D[Planet State Inference]
-    C --> E[Ritual Generator]
-    D --> F[Ritual Template Match]
-    E --> F
-    F --> G[Ritual Script + Effect Tags]
+
+### (Stubs) `/rituals/*` & `/craft/*`
+
+Poster-aligned **stubs**. They don’t read external templates and don’t persist.
+
+* `GET /rituals/perform` → one example ritual (status: `"planned"`)
+* `GET /rituals/recommend` → list of example rituals (status: `"planned"`)
+* `POST /craft/` → returns a symbolic item for a canonical emotion (status: `"planned"`)
+* `GET /craft/preview` → preview items per emotion (status: `"planned"`)
+
+These endpoints exist to match the poster’s architecture while avoiding over-claiming implementation.
 
 ---
-### Module Responsibility Map
-graph TD
-    A[Routes Layer] --> B[Services Layer]
-    B --> C1[emotion_engine.py]
-    B --> C2[planet_engine.py]
-    B --> C3[ritual_generator.py]
-    C1 --> D[EmotionAlchemyEngine]
-    A --> E[Models + Storage]
 
-## Crafting Preview Endpoint
+## EmotionAlchemyEngine (summary)
 
-### GET `/craft/preview`
+* **Model**: `bhadresh-savani/distilbert-base-uncased-emotion` (PyTorch CPU)
+* **Canonicalization**: raw labels → `sadness | guilt | nostalgia | gratitude`
 
-Returns a list of all possible items that can be crafted from each defined emotion type.
-
-#### ✅ Example Response:
+  * `anger/fear → guilt`
+  * `grief/sorrow/melancholy → sadness`
+  * `hope/acceptance/peace/joy/love → gratitude`
+* **Output (`EmotionEssence`)**
 
 ```json
-[
-  {
-    "item_name": "Echo Lantern",
-    "element": "EchoBloom",
-    "materials_used": ["EchoBloom", "MemoryPetal"],
-    "effect_tags": ["symbolic", "ritual", "nostalgia"],
-    "description": "A symbolic item crafted from nostalgia."
-  },
-  ...
-]
+{ "type": "nostalgia", "element": "EchoBloom", "effect_tags": ["ritual","memory"], "value": 0.84 }
 ```
-Used in front-end UI to show what players could craft, even if they haven't submitted memories yet.
 
+* **Heuristics**: optional +0.1 bonus for certain keywords (demo-friendly).
 
-### 🕯 Memory Visibility Setting: Public vs Private
+---
 
-This option appears only after the sealing ritual is complete.
+## Implementation Notes
 
-- **Public**: For users who wish to share their memory as a gentle, outward gesture.
-  > “I want the world to know how lovely they were.”
+* `CLOUDTAIL_PROFILE=presentation` (default) keeps the demo deterministic and DB-free.
+* `CLOUDTAIL_PROFILE=full` enables memory endpoints and live planet inference from Mongo.
+* Logs: utilities in `utils/logging_utils.py` write compact traces for demo playback.
 
-- **Private**: For those who prefer a quiet, internal space to hold grief.
+---
 
-Note: This is not a social sharing feature. It reflects grief pacing — some users seek silent remembrance, others long for shared witnessing.
+## Changelog (abridged)
 
-Made with fireflies and memory dust
+* Align **all outputs** to four canonical emotions and four planets.
+* Mark **Ritual/Crafting** as **stubs** to match the poster without over-claiming.
+* Move early services/templates to **legacy/** to avoid ambiguity.
+* Add `/healthz` and `/version` for basic ops hygiene.
 
+---
+
+**Licence**: academic/demo use.
+**Acknowledgements**: datasets, models, and inspirations listed in the thesis document.
