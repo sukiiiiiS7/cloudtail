@@ -1,52 +1,50 @@
+from __future__ import annotations
+
 from fastapi import APIRouter, HTTPException
+from uuid import uuid4
+from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
+
+from pymongo import ReturnDocument
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
+
 from cloudtail_backend.database.mongodb import get_memory_collection
 from cloudtail_backend.engine.emotion_engine import EmotionAlchemyEngine
 from cloudtail_backend.models.memory import MemoryEntry, EmotionEssence
 from cloudtail_backend.utils.logging_utils import log_emotion_to_file
-from uuid import uuid4
-from datetime import datetime
-from pydantic import BaseModel
-from fastapi.encoders import jsonable_encoder
+
 import json
-from pathlib import Path
-from bson import ObjectId
 
-router = APIRouter()
+router = APIRouter(tags=["memories"])
 
-# Emotion Engine Config
+# Engine config
 BASE_DIR = Path(__file__).resolve().parent.parent
 CONFIG_PATH = BASE_DIR / "storage" / "emotion_engine_config.json"
-
 with open(CONFIG_PATH, "r", encoding="utf-8") as f:
     config = json.load(f)
-
 engine = EmotionAlchemyEngine.from_dict(config)
 
 
-# Request schema for POST
+# Request schema
 class MemoryRequest(BaseModel):
     content: str
 
 
 @router.post("/memories/", response_model=MemoryEntry)
-async def upload_memory(request: MemoryRequest):
+async def upload_memory(request: MemoryRequest) -> MemoryEntry:
     """
-    Upload a new memory and extract its emotional essence.
-
-    This endpoint analyzes the submitted content using the EmotionAlchemyEngine,
-    generates a MemoryEntry, stores it in MongoDB, and logs the emotional result.
-
-    Returns:
-        MemoryEntry: The created memory object with inferred emotion.
+    Upload a new memory, extract its emotion, persist to DB, and log the result.
     """
-    content = request.content.strip()
+    content = (request.content or "").strip()
     if not content:
         raise HTTPException(status_code=400, detail="Content cannot be empty.")
 
-    # Emotion Extraction
+    # Emotion extraction
     essence: EmotionEssence = engine.extract_emotion(content)
 
-    # Create MemoryEntry
+    # Create entry (validators in model will canonicalize labels to the four)
     entry = MemoryEntry(
         id=str(uuid4()),
         content=content,
@@ -61,51 +59,48 @@ async def upload_memory(request: MemoryRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB insert failed: {e}")
 
-    # Log emotion result
-    log_emotion_to_file(essence.type, essence.element, essence.value, BASE_DIR)
+    # Log (use correct signature: text, label, score, path, element=None)
+    log_emotion_to_file(
+        text=content,
+        label=essence.type,
+        score=essence.value,
+        path=BASE_DIR,
+        element=essence.element,
+    )
 
     return entry
 
 
-@router.get("/memories/", response_model=list[MemoryEntry])
-async def get_memories():
+@router.get("/memories/", response_model=List[MemoryEntry])
+async def get_memories() -> List[MemoryEntry]:
     """
-    Retrieve all stored memory entries from the database.
-
-    Returns:
-        List[MemoryEntry]: All memory entries, excluding MongoDB internal fields.
+    Retrieve all stored memory entries (Mongo internal fields removed).
     """
     try:
         collection = get_memory_collection()
         cursor = collection.find({})
-        results = await cursor.to_list(length=1000)
+        docs = await cursor.to_list(length=1000)
 
-        # Remove MongoDB's _id field
-        for r in results:
-            r.pop("_id", None)
-
-        return results
+        out: List[MemoryEntry] = []
+        for d in docs:
+            d.pop("_id", None)
+            out.append(MemoryEntry(**d))
+        return out
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"DB read failed: {e}")
 
 
-# PATCH
 class MemoryUpdateRequest(BaseModel):
-    manual_override: str | None = None
-    is_private: bool | None = None
-    keywords: list[str] | None = None
+    manual_override: Optional[str] = None
+    is_private: Optional[bool] = None
+    keywords: Optional[List[str]] = None
 
 
 @router.patch("/memories/{memory_id}", response_model=MemoryEntry)
-async def update_memory(memory_id: str, update: MemoryUpdateRequest):
+async def update_memory(memory_id: str, update: MemoryUpdateRequest) -> MemoryEntry:
     """
-    Update an existing memory entry with manual override, privacy setting, or keywords.
-
-    If a manual_override is provided, the override will be logged separately
-    for transparency and traceability.
-
-    Returns:
-        MemoryEntry: The updated memory object.
+    Update an existing memory entry with manual override, privacy flag, or keywords.
+    When manual_override is provided, log an override record for auditability.
     """
     collection = get_memory_collection()
 
@@ -113,22 +108,27 @@ async def update_memory(memory_id: str, update: MemoryUpdateRequest):
     if not update_data:
         raise HTTPException(status_code=400, detail="No valid fields to update.")
 
-    result = await collection.find_one_and_update(
-        {"id": memory_id},
-        {"$set": update_data},
-        return_document=True
-    )
+    try:
+        doc = await collection.find_one_and_update(
+            {"id": memory_id},
+            {"$set": update_data},
+            return_document=ReturnDocument.AFTER,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"DB update failed: {e}")
 
-    if not result:
+    if not doc:
         raise HTTPException(status_code=404, detail="Memory not found.")
 
-    # Optional: log if user overrides the detected emotion
+    # Log override (if any) using the correct log signature
     if update.manual_override:
         log_emotion_to_file(
-            emotion_type=update.manual_override,
+            text=f"[override] {memory_id}",
+            label=update.manual_override,
+            score=0.0,
+            path=BASE_DIR,
             element="(manual override)",
-            value=0.0,
-            base_dir=BASE_DIR
         )
 
-    return result
+    doc.pop("_id", None)
+    return MemoryEntry(**doc)

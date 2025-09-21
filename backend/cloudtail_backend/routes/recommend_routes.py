@@ -27,39 +27,26 @@ PLANET_DISPLAY: Dict[str, str] = {
     "woven":   "Woven Meadow",
 }
 
-# ---- Mapping from emotion labels to planet keys ----
-# Covers both raw model labels (joy, love, anger...) and internal types (gratitude, nostalgia...).
+# ---- Mapping from emotion labels to planet keys (4-category contract) ----
+# Gratitude → ambered | Sadness → rippled | Guilt → spiral | Nostalgia → woven
 EMOTION_TO_PLANET: Dict[str, str] = {
-    # Positive / warm → ambered
-    "warmth": "ambered",
-    "gratitude": "ambered",
-    "joy": "ambered",
-    "love": "ambered",
-    "hope": "ambered",
-    "compassion": "ambered",
-    "pride": "ambered",
+    # Gratitude-family → ambered (merge peace/acceptance/hope/calm/trust/contentment/empathy)
+    "gratitude": "ambered", "joy": "ambered", "love": "ambered",
+    "hope": "ambered", "acceptance": "ambered", "peace": "ambered",
+    "calm": "ambered", "trust": "ambered", "contentment": "ambered", "empathy": "ambered",
+    "warmth": "ambered", "pride": "ambered", "compassion": "ambered",
 
-    # Heavy / turbulent → rippled
-    "sadness": "rippled",
-    "grief": "rippled",
-    "guilt": "rippled",
-    "fear": "rippled",
-    "anger": "rippled",
-    "frustration": "rippled",
-    "shame": "rippled",
+    # Sadness-family → rippled
+    "sadness": "rippled", "grief": "rippled", "sorrow": "rippled", "melancholy": "rippled",
 
-    # Calm / understanding → spiral
-    "calm": "spiral",
-    "acceptance": "spiral",
-    "trust": "spiral",
-    "contentment": "spiral",
-    "empathy": "spiral",
+    # Guilt-family → spiral
+    "guilt": "spiral", "regret": "spiral", "shame": "spiral",
+    "anger": "spiral", "fear": "spiral", "frustration": "spiral",
 
-    # Longing / nostalgic → woven
-    "longing": "woven",
-    "nostalgia": "woven",
-    "melancholy": "woven",
+    # Nostalgia-family → woven
+    "nostalgia": "woven", "longing": "woven",
 }
+
 
 # ---- Request/Response models ----
 class RecommendReq(BaseModel):

@@ -1,42 +1,43 @@
 # Cloudtail Backend API Reference
 
-> This document provides a full reference of the backend API endpoints for the Cloudtail grief ritual engine.
+> FastAPI service for the Unity demo. Converts free-text memories to **four canonical emotions**, maps them to **four planets**, and exposes poster-aligned **stubs** for Ritual & Crafting.
+
+All responses are JSON. Errors follow standard HTTP status semantics.
 
 ---
 
-## Overview
+## Profiles
 
-Cloudtail backend uses FastAPI to expose endpoints for:
-
-- Submitting and retrieving grief memories  
-- Generating emotional inferences and planetary evolution states  
-- Crafting symbolic items from emotions  
-- Generating ritual scripts  
-- Providing simplified recommendation endpoints for presentation (adapter layer)
-
-All responses are in JSON. Error responses follow standard HTTP status conventions.
+* **presentation** (default): no DB required. `/planet/status`, `/api/recommend`, `/rituals/*` (stub), `/craft/*` (stub).
+* **full**: enables memory CRUD at `/api/memories/*` (requires MongoDB connection).
 
 ---
 
-## Memory Endpoints
+## Canonical Contract
 
-### `POST /memories/` – Upload a new memory
+* Emotions: `sadness`, `guilt`, `nostalgia`, `gratitude`
+  (aliases like `grief/sorrow → sadness`, `hope/acceptance/peace/joy/love → gratitude` are **canonicalized** before returning)
+* Planets: `rippled` (sadness), `spiral` (guilt), `woven` (nostalgia), `ambered` (gratitude)
 
-**Request Body**:
+---
+
+## Memory Endpoints (full profile)
+
+### `POST /api/memories/` — Upload a memory
+
+**Body**
+
 ```json
-{
-  "content": "She used to curl up by my feet every night."
-}
+{ "content": "She used to curl up by my feet every night." }
 ```
 
-**Response**:
-Returns a `MemoryEntry` with extracted emotion.
+**Response (`MemoryEntry`)**
 
 ```json
 {
   "id": "uuid",
-  "content": "...",
-  "timestamp": "...",
+  "content": "She used to curl up by my feet every night.",
+  "timestamp": "2025-09-18T12:30:10Z",
   "detected_emotion": "nostalgia",
   "manual_override": null,
   "is_private": false,
@@ -44,230 +45,255 @@ Returns a `MemoryEntry` with extracted emotion.
 }
 ```
 
----
+Notes:
 
-### `GET /memories/` – Fetch all memories
-
-**Query Parameters (future optional)**:
-- `emotion`
-- `keyword`
-- `is_private`
-
-Returns an array of `MemoryEntry` objects.
+* Emotion is extracted by the model, then **canonicalized to the four**.
+* A compact log line is written for demo playback.
 
 ---
 
-### `PATCH /memories/{memory_id}` – Update a memory
+### `GET /api/memories/` — List memories
 
-**Request Body (partial allowed)**:
+Returns an array of `MemoryEntry` (Mongo `_id` stripped).
+
+---
+
+### `PATCH /api/memories/{memory_id}` — Update memory
+
+**Body** (partial allowed)
+
 ```json
 {
-  "manual_override": "grief",
+  "manual_override": "sadness",
   "is_private": true,
   "keywords": ["pet", "ritual"]
 }
 ```
 
-**Note**: Follows FastAPI PATCH logic. Supports partial updates.
+Effects:
+
+* `manual_override` (if provided) **takes precedence** over the detected label.
+* The stored/returned label is **canonicalized** to the four.
 
 ---
 
-## Planetary Endpoints
+## Planet Endpoint
 
-### `GET /planet/status` – Retrieve grief planet state
+### `GET /planet/status` — Current planet state
 
-Returns current planetary evolution status based on emotion history.
+Derives the planet from recent emotions (full) or returns a safe preview/default (presentation).
 
-**Response**:
+**Response (`PlanetState`)**
+
 ```json
 {
-  "state_tag": "grief",
-  "dominant_emotion": "grief",
-  "emotion_history": ["grief", "grief", "grief", "guilt", "grief"],
-  "color_palette": ["#3E3E72", "#5B5B99"],
-  "visual_theme": "ashen",
-  "last_updated": "2025-07-18T14:41:57.537408"
+  "state_tag": "nostalgia",
+  "dominant_emotion": "nostalgia",
+  "emotion_history": ["nostalgia", "sadness", "nostalgia"],
+  "color_palette": ["#B9A3D0", "#D3C7E6"],
+  "visual_theme": "mist",
+  "last_updated": "2025-09-18T12:31:40Z"
 }
 ```
 
-Derived from latest 5 memory entries, prioritizing `manual_override` over `detected_emotion`.
+Contract guard: any alias is canonicalized before returning.
 
 ---
 
-## Crafting Endpoints
+## Recommendation (Presentation Adapter)
 
-### `POST /craft/` – Generate emotional item from essence
+### `POST /api/recommend` — One-step planet recommendation
 
-Transforms a given emotional essence into a symbolic commemorative item, using config-defined mappings.
+**Body**
 
-**Request Body**:
+```json
+{ "text": "I still remember the sunset when she left." }
+```
+
+**Response**
+
 ```json
 {
-  "emotion_type": "nostalgia"
+  "topEmotions": [
+    { "label": "nostalgia", "score": 0.84 },
+    { "label": "sadness",  "score": 0.61 }
+  ],
+  "planet_key": "woven"   // one of: ambered | rippled | spiral | woven
 }
 ```
 
-**Response:**
+Mapping (aliases → planet):
+
+* gratitude-family → **ambered**
+* sadness-family → **rippled**
+* guilt-family → **spiral**
+* nostalgia-family → **woven**
+
+---
+
+## Crafting (Stub, poster-aligned)
+
+### `POST /craft/` — Craft symbolic item (stub)
+
+**Body**
+
+```json
+{ "emotion_type": "nostalgia" }
+```
+
+**Response (`CraftResponse`)**
+
 ```json
 {
+  "status": "planned",
   "item_name": "Echo Lantern",
   "element": "EchoBloom",
-  "materials_used": ["EchoBloom", "MemoryPetal"],
-  "effect_tags": ["symbolic", "ritual", "nostalgia"],
-  "description": "A symbolic item crafted from nostalgia."
+  "materials_used": ["MemoryPetal"],
+  "effect_tags": ["symbolic", "nostalgia"],
+  "description": "A symbolic item crafted from nostalgia (demo stub)."
 }
 ```
 
-If no match is found for the emotion, returns 404.
+Notes:
+
+* No external templates/config files are read.
+* Status is **"planned"** to reflect poster alignment.
 
 ---
 
-### `GET /craft/preview` – Preview all craftable items
+### `GET /craft/preview` — Preview items (stub)
 
-Returns a preview list of craftable items, one for each emotion type defined in cloudtail_config.json.  
-This is useful for UI designers or sandbox visualisation.
+**Response**
 
-**Response**:
 ```json
 [
   {
-    "item_name": "Echo Lantern",
-    "element": "EchoBloom",
-    "materials_used": ["EchoBloom", "MemoryPetal"],
-    "effect_tags": ["symbolic", "ritual", "nostalgia"],
-    "description": "A symbolic item crafted from nostalgia."
+    "status": "planned",
+    "item_name": "Rain Echo Chime",
+    "element": "CrystalShard",
+    "materials_used": ["AshDust"],
+    "effect_tags": ["symbolic", "sadness"],
+    "description": "A symbolic item crafted from sadness (demo stub)."
   },
   {
-    "item_name": "Phoenix Pearl",
-    "element": "CrystalShard",
-    "materials_used": ["CrystalShard", "AshDust"],
-    "effect_tags": ["symbolic", "ritual", "grief"],
-    "description": "A symbolic item crafted from grief."
+    "status": "planned",
+    "item_name": "Mirror of Regret",
+    "element": "RustIngot",
+    "materials_used": ["Tarnish"],
+    "effect_tags": ["symbolic", "guilt"],
+    "description": "A symbolic item crafted from guilt (demo stub)."
+  },
+  {
+    "status": "planned",
+    "item_name": "Echo Lantern",
+    "element": "EchoBloom",
+    "materials_used": ["MemoryPetal"],
+    "effect_tags": ["symbolic", "nostalgia"],
+    "description": "A symbolic item crafted from nostalgia (demo stub)."
+  },
+  {
+    "status": "planned",
+    "item_name": "Sun Thread Locket",
+    "element": "LightDust",
+    "materials_used": ["WarmGlow"],
+    "effect_tags": ["symbolic", "gratitude"],
+    "description": "A symbolic item crafted from gratitude (demo stub)."
   }
 ]
 ```
 
-**Crafting Logic Summary**  
-Crafted items are mapped based on:
-- emotion_type: e.g. "nostalgia"
-- element + materials: pulled from emotion_map in cloudtail_config.json
-- Item selected if any ingredient matches recipe in crafted_items  
-Handled in: `services/crafting_engine.py`
-
 ---
 
-## Ritual Endpoints
+## Rituals (Stub, poster-aligned)
 
-### `POST /ritual/perform` – Select and return ritual script
+### `GET /rituals/perform` — Return one ritual (stub)
 
-Uses current planetary state + recent emotion path to choose appropriate ritual template.
+Query (optional): `ritual_type`, `preferred_ritual`
 
-**Response**:
+**Response (`RitualTemplate`)**
+
 ```json
 {
-  "ritual_id": "echo_bloom",
+  "status": "planned",
+  "ritual_id": "ashes_to_light",
+  "ritual_type": "release",
+  "emotion_path": ["sadness", "nostalgia"],
+  "required_planet": "rippled",
   "script": [
-    { "action": "plant", "object": "echo_seed", "line": "From memory, we root the bloom." },
-    { "action": "water", "object": "memory_root", "line": "Each tear a seed of something new." },
-    { "action": "grow", "object": "bloom_light", "line": "Let the past glow gently in the now." }
+    {"action":"burn","object":"memory_shard","line":"Let it become ash."},
+    {"action":"scatter","object":"ash","line":"To the winds of remembrance."},
+    {"action":"ignite","object":"sky_flame","line":"Light the path forward."}
   ],
-  "effect_tags": ["remembrance", "growth", "reflection"]
+  "effect_tags": ["remembrance", "release"]
 }
 ```
 
-**Ethics Logic**  
-Templates requiring “hope” or “rebirth” are blocked if user is still in heavy grief.  
-Fallback mechanism prevents premature emotional transitions.
+### `GET /rituals/recommend` — Recommend rituals (stub)
 
----
+Query: `emotion` (one of four), `planet` (ambered/rippled/spiral/woven)
 
-### `GET /rituals/recommend` – Recommend rituals based on emotion & planet state
+**Response**
 
-**Query Parameters**:
-- `emotion_path`: array of recent emotion strings
-- `planet_state`: current planet state (e.g. "grief", "neutral")
-- `ritual_type` (optional): filter by ritual type
-- `user_override` (optional): override ethics filter
-
-Returns a list of matching ritual templates (max 5 by default).
-
-**Response**:
 ```json
 [
   {
-    "ritual_id": "echo_bloom",
-    "effect_tags": ["remembrance", "growth", "reflection"],
-    "script": [...]
+    "status": "planned",
+    "ritual_id": "thread_of_gratitude",
+    "ritual_type": "honor",
+    "emotion_path": ["gratitude"],
+    "required_planet": "ambered",
+    "script": [
+      {"action":"weave","object":"light_thread","line":"Honor threads your memory."},
+      {"action":"hang","object":"sun_locket","line":"Let it shine in the sky."}
+    ],
+    "effect_tags": ["honor", "warmth"]
   }
 ]
 ```
 
+Notes:
+
+* Stubs do **not** read external JSON templates.
+* Status remains **"planned"** to match the poster.
+
 ---
 
-## Recommendation Endpoints (Presentation Adapter)
+## Health & Version
 
-These endpoints wrap emotion inference and planet mapping into simplified calls for the Unity prototype.  
-They are classified as **non-core** and are not part of the main research evaluation.
+### `GET /healthz`
 
-### `POST /api/recommend` – One-step planet recommendation
-
-**Request Body**:
 ```json
-{
-  "content": "She felt warm and quiet like sunset."
-}
+{ "ok": true, "profile": "presentation", "version": "1.0.0-four-planets" }
 ```
 
-**Response**:
+### `GET /version`
+
 ```json
-{
-  "planet_index": 0,
-  "planet_key": "ambered",
-  "display_name": "Ambered Haven",
-  "emotion": "warmth",
-  "confidence": 0.82,
-  "reason": "Detected warm or thankful tone; mapped to ambered planet.",
-  "essence": {
-    "valence": 0.6,
-    "arousal": 0.3
-  }
-}
+{ "version": "1.0.0-four-planets" }
 ```
 
 ---
 
-### `GET /api/planets` – List available planets
+## MongoDB Notes (full profile)
 
-**Response**:
-```json
-[
-  { "key": "ambered", "index": 0, "display_name": "Ambered Haven" },
-  { "key": "rippled", "index": 1, "display_name": "Rippled Cove" },
-  { "key": "spiral",  "index": 2, "display_name": "Spiral Nest" },
-  { "key": "woven",   "index": 3, "display_name": "Woven Meadow" }
-]
-```
-
----
-
-## MongoDB Integration Notes
-
-- All memory data is stored in the `memories` collection.  
-- Documents follow `MemoryEntry` schema: `id`, `content`, `timestamp`, `detected_emotion`, `manual_override`, `is_private`, `keywords`.  
-- Planet state is computed dynamically, not persisted.  
-- Rituals are selected from `ritual_templates.json` (local storage).
+* Collection: `memories` (schema: `MemoryEntry`).
+* Planet state is **computed**, not persisted.
+* Private memories (`is_private = true`) are excluded from inference.
 
 ---
 
 ## Endpoint Index
 
-- `POST /memories/` – Upload memory  
-- `GET /memories/` – List memories  
-- `PATCH /memories/{id}` – Update memory  
-- `GET /planet/status` – Get planet state  
-- `POST /craft/` – Craft item  
-- `GET /craft/preview` – Preview craftable items  
-- `POST /ritual/perform` – Perform ritual  
-- `GET /rituals/recommend` – Recommend rituals  
-- `POST /api/recommend` – Recommend planet (adapter)  
-- `GET /api/planets` – List planets (adapter)  
+* `POST /api/memories/` — Upload memory *(full)*
+* `GET /api/memories/` — List memories *(full)*
+* `PATCH /api/memories/{id}` — Update memory *(full)*
+* `GET /planet/status` — Planet state
+* `POST /api/recommend` — One-step recommendation
+* `POST /craft/` — Craft item *(stub)*
+* `GET /craft/preview` — Craftable preview *(stub)*
+* `GET /rituals/perform` — One ritual *(stub)*
+* `GET /rituals/recommend` — Ritual list *(stub)*
+
+---
+
+需要我把这份直接落到你仓库（替换 `backend_api.md`），或者你还有想保留的旧段落？如果你粘过去后发现哪一处和代码返回还不完全一致，丢个例子我再对到位。

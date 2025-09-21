@@ -2,6 +2,34 @@ from datetime import datetime
 from collections import Counter
 from cloudtail_backend.models.planet import PlanetState
 
+# Canonical mapping: collapse many raw labels into 4 categories
+def _canonicalize(label: str) -> str:
+    l = (label or "").lower()
+    if l in ("sadness", "grief", "sorrow", "melancholy"):
+        return "sadness"
+    if l in ("guilt", "regret", "shame", "anger", "fear", "frustration"):
+        return "guilt"
+    if l in ("nostalgia", "longing"):
+        return "nostalgia"
+    if l in ("gratitude", "joy", "love", "hope", "acceptance", "peace", "calm",
+             "trust", "contentment", "empathy", "warmth", "pride", "compassion"):
+        return "gratitude"
+    return "gratitude"
+
+# Visual presets per canonical emotion
+PALETTE = {
+    "sadness":   ["#3E3E72", "#5B5B99"],   # cool blues / mist
+    "nostalgia": ["#AACFCF", "#DDB0A9"],   # faded teal / warm memory
+    "guilt":     ["#B00020", "#FF8A80"],   # red / cracks
+    "gratitude": ["#FFF176", "#FFD54F"],   # golden light
+}
+THEME = {
+    "sadness": "ashen",
+    "nostalgia": "sepia_memory",
+    "guilt": "storm",
+    "gratitude": "lightburst",
+}
+
 # Infers a planet state based on recent emotion sequence
 def infer_planet_state(emotions: list[str]) -> PlanetState:
     if not emotions:
@@ -14,31 +42,15 @@ def infer_planet_state(emotions: list[str]) -> PlanetState:
             last_updated=datetime.utcnow()
         )
 
-    # Pick the most frequent emotion as dominant
-    dominant = Counter(emotions).most_common(1)[0][0]
-
-    # Define visual styles based on emotion type
-    palette_map = {
-        "grief": ["#3E3E72", "#5B5B99"],
-        "nostalgia": ["#AACFCF", "#DDB0A9"],
-        "hope": ["#EFD1D1", "#F8EFD4"],
-        "anger": ["#B00020", "#FF8A80"],
-        "joy": ["#FFF176", "#FFD54F"],
-    }
-
-    theme_map = {
-        "grief": "ashen",
-        "nostalgia": "sepia_memory",
-        "hope": "rebirth_glow",
-        "anger": "storm",
-        "joy": "lightburst"
-    }
+    # Canonicalize before counting
+    canon = [_canonicalize(e) for e in emotions]
+    dominant = Counter(canon).most_common(1)[0][0]
 
     return PlanetState(
         state_tag=dominant,
         dominant_emotion=dominant,
-        emotion_history=emotions,
-        color_palette=palette_map.get(dominant, ["#AAAAAA"]),
-        visual_theme=theme_map.get(dominant, "default"),
+        emotion_history=canon,
+        color_palette=PALETTE.get(dominant, ["#AAAAAA"]),
+        visual_theme=THEME.get(dominant, "default"),
         last_updated=datetime.utcnow()
     )
