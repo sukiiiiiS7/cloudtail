@@ -131,6 +131,9 @@ Partial updates allowed (e.g., `manual_override`, `is_private`, `keywords`).
 
 ### GET `/craft/preview`  — preview items (stub)
 Returns an array of preview artifacts for the four emotions (status `"planned"`).
+**Preview (example)**
+
+![Craft preview](images/screenshots/13_stub_craft_preview.png)
 
 ---
 
