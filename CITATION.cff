@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: Cloudtail — Ritual Sandbox for Pet Loss (Demo Build)
+version: 1.0.0-demo
+date-released: 2025-09-21
+authors:
+  - given-names: Siqi
+    family-names: Wu
+    aliases:
+      - S7
+repository-code: https://github.com/sukiiiiiS7/cloudtail
