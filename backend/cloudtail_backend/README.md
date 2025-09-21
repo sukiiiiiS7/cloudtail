@@ -1,215 +1,154 @@
 # Cloudtail Backend
 
-> Memory → Emotion → Planet. A creative grief support backend powering the Unity demo.
-
-This service turns free-text memories into **four canonical emotions** and maps them to **four planets** for the Unity visualization.
-Ritual and Crafting are **poster-aligned stubs** in the demo build (return example JSON with `status:"planned"`).
+FastAPI-based backend for the Cloudtail demo and measurement builds. Text input is mapped to **four canonical emotions** and further to a **planet key** consumed by the Unity client.
 
 ---
 
-## Demo Scope
+## Profiles & Ports
 
-* **Implemented**: memories (optional), emotion extraction, planet status, text-to-planet recommendation.
-* **Stubs (poster-aligned)**: `/rituals/*` and `/craft/*` return example data with `status:"planned"`.
-* **Canonical emotions**: `sadness`, `guilt`, `nostalgia`, `gratitude`
-  (`peace / acceptance / hope / joy / love` → **merged** into `gratitude`).
-* **Planets**: `rippled` (sadness), `spiral` (guilt), `woven` (nostalgia), `ambered` (gratitude).
+| Profile      | Port | Routes available                                  | Primary use              |
+|--------------|------|-----------------------------------------------------|--------------------------|
+| presentation | 8020 | `/api/recommend`, `/planet/status` (+ demo stubs)  | Recording / live demo    |
+| full         | 8010 | All of the above **+** `/api/memories/*`           | Measurement / probing    |
 
----
-
-## Project Structure
-
-```
-cloudtail-backend/
-├── models/
-│   ├── memory.py          # MemoryEntry, EmotionEssence (labels canonicalized to 4 emotions)
-│   └── planet.py          # PlanetState (schema used by /planet)
-├── engine/
-│   ├── emotion_model.py   # HF pipeline wrapper (CPU/PyTorch)
-│   ├── emotion_engine.py  # Raw → canonical mapping (→ four emotions)
-│   └── planet_engine.py   # Recent emotions → planet state
-├── routes/
-│   ├── memory_routes.py   # (full profile) memory read/write
-│   ├── planet_routes.py   # /planet, /planet/status
-│   ├── recommend_routes.py# /api/recommend (no DB)
-│   ├── ritual_routes.py   # (stub) poster-aligned examples
-│   └── crafting_routes.py # (stub) poster-aligned examples
-├── storage/
-│   ├── data.json                  # tiny seed (optional)
-│   └── emotion_engine_config.json # mapping/config (no 'peace' output)
-├── utils/
-│   └── logging_utils.py
-├── legacy/               # Archived prototypes (not imported in demo build)
-│   ├── crafting_engine.py
-│   ├── emotion_extractor.py
-│   └── ritual_generator.py
-├── main.py
-└── requirements.txt
-```
-
-**Notes on legacy prototypes**
-`backend/cloudtail_backend/legacy/` keeps early prototypes that relied on external JSON templates/configs. They are **not imported** by the demo build.
-The final artefact uses:
-
-* `engine/` for emotion extraction (canonical four emotions), and
-* stub routes for `/rituals/*` and `/craft/*` aligned with the poster.
+Health check: `GET /healthz` → `{"profile":"presentation"|"full"}`.
 
 ---
 
 ## Run
 
-```bash
-# Presentation profile (no DB required)
-# Windows PowerShell:
-$env:CLOUDTAIL_PROFILE="presentation"
-uvicorn backend.cloudtail_backend.main:app --reload
-# Visit:
-#   http://127.0.0.1:8000/healthz
-#   http://127.0.0.1:8000/planet/status
+**Windows (PowerShell)**
+```powershell
+# Presentation (demo)
+cd backend
+$env:CLOUDTAIL_PROFILE = "presentation"
+python -m uvicorn --app-dir . cloudtail_backend.main:app --host 127.0.0.1 --port 8020 --reload
 ```
 
-Optional **full** profile (needs MongoDB & connection string) enables `/api/memories/*`.
+```powershell
+# Full (measurement)
+cd backend
+$env:CLOUDTAIL_PROFILE = "full"
+python -m uvicorn --app-dir . cloudtail_backend.main:app --host 127.0.0.1 --port 8010 --reload
+```
+
+OpenAPI/Swagger:
+- `http://127.0.0.1:8020/docs` (presentation)
+- `http://127.0.0.1:8010/docs` (full)
+
+Optional scripts: `backend/run_presentation.bat`, `backend/run_full.bat`.
 
 ---
 
-## Endpoints
+## Canonical Emotions & Planets
 
-### GET `/healthz`
+- Canonical emotions: `sadness`, `guilt`, `nostalgia (longing)`, `gratitude`  
+  (aliases normalized; e.g., `longing → nostalgia`, `acceptance/peace/hope/joy/love → gratitude`)
+- Planet keys (design set): `rippled` (sadness), `spiral` (guilt), `woven` (nostalgia), `ambered` (gratitude)
 
-Health probe.
-
-```json
-{ "ok": true, "profile": "presentation", "version": "1.0.0-four-planets" }
-```
-
-### GET `/version`
-
-Service version.
-
-```json
-{ "version": "1.0.0-four-planets" }
-```
-
-### GET `/planet/status`
-
-Returns the **current planet state**. In presentation mode it reads a small local preview or a safe default; in full mode it derives from recent memories.
-
-#### Response schema: `PlanetState`
-
-| Field              | Type        | Description                                                               |       |           |              |
-| ------------------ | ----------- | ------------------------------------------------------------------------- | ----- | --------- | ------------ |
-| `state_tag`        | `str`       | High-level state (one of: \`sadness                                       | guilt | nostalgia | gratitude\`) |
-| `dominant_emotion` | `str`       | Dominant canonical emotion among recent entries (same four)               |       |           |              |
-| `emotion_history`  | `List[str]` | Recent canonicalized emotions (manual overrides preferred when available) |       |           |              |
-| `color_palette`    | `List[str]` | Suggested hex colors                                                      |       |           |              |
-| `visual_theme`     | `str`       | Client theme id (e.g., `mist`, `wind`, `clear`, `sepia_memory`)           |       |           |              |
-| `last_updated`     | `datetime`  | UTC timestamp                                                             |       |           |              |
-
-> Contract guard: any alias (e.g., `grief/sorrow → sadness`, `hope/acceptance/peace/joy/love → gratitude`) is **canonicalized** before returning.
+> Current build may aggregate multiple emotions into the same `planet_key` (see **Reproducibility**).
 
 ---
+
+## API Summary
 
 ### POST `/api/recommend`
+**Purpose**: map free text to `(emotion, planet_key)`.
 
-Text → top emotions (canonical) → planet key.
+**Field semantics (request body)**
+- `content`: user-provided raw text (free text).
+- `text`: optionally pre-normalized text (e.g., whitespace collapse, punctuation compression, aliasing such as `miss u|missyou → miss you`).
+- **Current build behavior**: either field is accepted; **one is sufficient**. Including **both** is valid and does not raise errors. Clients without client-side normalization may send only `content`.
 
-**Request**
-
+**Example request**
 ```json
-{ "text": "I still remember the sunset when she left." }
+{ "content": "I still remember the sunset", "text": "I still remember the sunset" }
 ```
 
-**Response (example)**
-
+**Example response**
 ```json
 {
-  "topEmotions": [
-    { "label": "nostalgia", "score": 0.84 },
-    { "label": "sadness",  "score": 0.61 }
-  ],
-  "planet_key": "woven"   // ambered|rippled|spiral|woven
+  "planet_index": 0,
+  "planet_key": "ambered",
+  "display_name": "Ambered Haven",
+  "emotion": "gratitude",
+  "confidence": 0.93,
+  "reason": "Engine -> ambered",
+  "essence": {
+    "internal": "gratitude",
+    "element": "LightDust",
+    "tags": ["healing", "ambient"],
+    "raw_value": 0.93
+  }
 }
 ```
 
-**Mapping (aliases → planet)**
-
-* **gratitude-family → ambered**
-  `gratitude, joy, love, hope, acceptance, peace, calm, trust, contentment, empathy, warmth, pride, compassion`
-* **sadness-family → rippled**
-  `sadness, grief, sorrow, melancholy`
-* **guilt-family → spiral**
-  `guilt, regret, shame, anger, fear, frustration`
-* **nostalgia-family → woven**
-  `nostalgia, longing`
-
----
-
-### (Full profile) `/api/memories/*`
-
-Memory CRUD and manual overrides (optional feature for evaluation / debugging).
-
-* `POST /api/memories/` – add a memory → triggers emotion extraction
-* `GET /api/memories/` – list
-* `PATCH /api/memories/{id}` – supports `manual_override`, `is_private`, `keywords`
-
-**Override precedence**
-
-```python
-final = memory.manual_override or memory.detected_emotion
-# The chosen label is then canonicalized to one of the four categories before returning.
+**Quick probe (PowerShell)**
+```powershell
+$u='http://127.0.0.1:8010/api/recommend'  # or 8020
+$b=@{content='I still remember the sunset'; text='I still remember the sunset'} | ConvertTo-Json
+Invoke-RestMethod -Method Post $u -ContentType 'application/json; charset=utf-8' -Body $b
 ```
 
-`is_private = true` memories are excluded from planet inference.
+### GET `/planet/status`
+Returns the current planet state consumed by the Unity demo.
+
+### GET `/healthz`
+Returns minimal liveness information including the active `profile`.
+
+### `/api/memories/*`  (full profile only)
+CRUD routes for memory entries used by planet inference. Not exposed in the `presentation` profile.
 
 ---
 
-### (Stubs) `/rituals/*` & `/craft/*`
+## Poster-aligned demo stubs (non-persistent)
 
-Poster-aligned **stubs**. They don’t read external templates and don’t persist.
+These routes mirror the poster architecture and de-risk UI integration. They are **demo-only**, **non-persistent**, and return **deterministic** payloads to support reproducibility. No external templates or storage are used.
 
-* `GET /rituals/perform` → one example ritual (status: `"planned"`)
-* `GET /rituals/recommend` → list of example rituals (status: `"planned"`)
-* `POST /craft/` → returns a symbolic item for a canonical emotion (status: `"planned"`)
-* `GET /craft/preview` → preview items per emotion (status: `"planned"`)
-
-These endpoints exist to match the poster’s architecture while avoiding over-claiming implementation.
+| Method | Path                | Purpose                                       | Profile |
+|-------:|---------------------|-----------------------------------------------|:-------:|
+|  GET   | `/rituals/perform`  | Return a sample ritual descriptor              |  all    |
+|  GET   | `/rituals/recommend`| Return a small list of sample rituals          |  all    |
+|  POST  | `/craft/`           | Return a symbolic artifact for a given emotion |  all    |
+|  GET   | `/craft/preview`    | Return preview artifacts per canonical emotion |  all    |
 
 ---
 
-## EmotionAlchemyEngine (summary)
+## Reproducibility
 
-* **Model**: `bhadresh-savani/distilbert-base-uncased-emotion` (PyTorch CPU)
-* **Canonicalization**: raw labels → `sadness | guilt | nostalgia | gratitude`
+- Procedural notes and the ten-probe snapshot: `../docs/Reproducibility.md`  
+- Ten-probe artifacts: `../docs/probe_results.md`, `../docs/probe_results.csv`
 
-  * `anger/fear → guilt`
-  * `grief/sorrow/melancholy → sadness`
-  * `hope/acceptance/peace/joy/love → gratitude`
-* **Output (`EmotionEssence`)**
+---
 
-```json
-{ "type": "nostalgia", "element": "EchoBloom", "effect_tags": ["ritual","memory"], "value": 0.84 }
+## Known Limitations (current build)
+
+- **Emotion→Planet aggregation**: multiple emotions may map to `planet_key=ambered`.
+- **Nostalgia (longing) absorption**: nostalgia/longing forms are often mapped into gratitude.
+- **Longing vs. Gratitude phrasing**: English forms containing *long/yearn/peace/thank* may skew positive.
+- **Edge/degraded input**: tokens like `missyou!!!` can trigger `guilt → rippled`.
+- **Mixed language**: multilingual lines reduce confidence; single-language short inputs are more stable for demos.
+
+**Near-term plan (post-submission)**
+- Restore **one-to-one** emotion→planet mapping (e.g., `sadness → rippled`, `guilt → spiral`, `nostalgia → woven`, `gratitude → ambered`).  
+- Strengthen nostalgia classification and alias set to reduce absorption into gratitude.  
+- Ship a minimal client-side normalization toggle (whitespace collapse, punctuation compression, `miss u|missyou → miss you`).  
+- Add a regression suite: 4×N probe grid + confusion matrix across profiles.
+
+---
+
+## Troubleshooting
+
+- `/api/memories/*` not visible in Swagger → active profile is `presentation` (expected). Use `full` or open `:8010/docs`.
+- All responses identical → request likely sent to the presentation port (`:8020`) or body field not read; include `"content"` and/or `"text"` in the JSON payload.
+- Swagger not sending → **Try it out** must be clicked before **Execute**.
+- Port/profile confusion → confirm via `GET /healthz`.
+
+---
+
+## Environment Fingerprint
+
+```bash
+python -V
+git rev-parse --short HEAD
 ```
-
-* **Heuristics**: optional +0.1 bonus for certain keywords (demo-friendly).
-
----
-
-## Implementation Notes
-
-* `CLOUDTAIL_PROFILE=presentation` (default) keeps the demo deterministic and DB-free.
-* `CLOUDTAIL_PROFILE=full` enables memory endpoints and live planet inference from Mongo.
-* Logs: utilities in `utils/logging_utils.py` write compact traces for demo playback.
-
----
-
-## Changelog (abridged)
-
-* Align **all outputs** to four canonical emotions and four planets.
-* Mark **Ritual/Crafting** as **stubs** to match the poster without over-claiming.
-* Move early services/templates to **legacy/** to avoid ambiguity.
-* Add `/healthz` and `/version` for basic ops hygiene.
-
----
-
-**Licence**: academic/demo use.
-**Acknowledgements**: datasets, models, and inspirations listed in the thesis document.

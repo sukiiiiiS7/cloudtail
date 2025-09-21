@@ -16,11 +16,43 @@
   },
   "bonus_rules": {
     "guilt": {
-      "keywords": ["sorry"],
+      "keywords": [
+        "sorry"
+      ],
       "bonus": 0.1
     },
     "nostalgia": {
-      "keywords": ["sunset", "home", "beach", "smell"],
+      "keywords": [
+        "sunset",
+        "home",
+        "beach",
+        "smell",
+        "sunrise",
+        "miss",
+        "miss you",
+        "miss u",
+        "long",
+        "yearn",
+        "remember",
+        "memory",
+        "memories",
+        "used to",
+        "back then",
+        "again",
+        "old times",
+        "photo",
+        "picture",
+        "window",
+        "purring",
+        "怀念",
+        "想你",
+        "想念",
+        "回忆",
+        "还记得",
+        "以前",
+        "那时候",
+        "老照片"
+      ],
       "bonus": 0.1
     }
   }

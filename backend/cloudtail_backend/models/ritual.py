@@ -1,17 +1,14 @@
 from __future__ import annotations
-from typing import List, Optional, Literal
+from typing import List, Dict, Any, Literal
 from pydantic import BaseModel
 
-# Canonical four emotions and planet keys (demo contract)
-DemoEmotion = Literal["sadness", "guilt", "nostalgia", "gratitude"]
-DemoPlanet  = Literal["ambered", "rippled", "spiral", "woven"]
+Emotion = Literal["sadness", "gratitude", "nostalgia", "guilt", "acceptance"]
 
 class RitualTemplate(BaseModel):
-    """Ritual template returned by ritual stub endpoints."""
-    status: str                 # always "planned" in the demo stub
+    status: Literal["planned", "ok"] = "planned"
     ritual_id: str
-    ritual_type: Optional[str] = None
-    emotion_path: List[DemoEmotion]
-    required_planet: DemoPlanet
-    script: List[dict]
+    ritual_type: Literal["release", "honor", "seal", "reflect"]
+    emotion_path: List[Emotion]
+    required_planet: str
+    script: List[Dict[str, Any]]  # [{action, object, line}]
     effect_tags: List[str]

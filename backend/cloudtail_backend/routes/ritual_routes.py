@@ -1,6 +1,34 @@
-from fastapi import APIRouter, Query
 from typing import Optional, List
-from ..models.ritual import RitualTemplate, DemoEmotion, DemoPlanet
+from fastapi import APIRouter, Query
+
+# ---- soft imports for presentation profile ----
+try:
+    from ..models.ritual import RitualTemplate, DemoEmotion, DemoPlanet  # type: ignore
+except Exception:
+    # Minimal fallbacks (keep types stable for OpenAPI)
+    from enum import Enum
+    from pydantic import BaseModel
+
+    class DemoEmotion(str, Enum):
+        sadness   = "sadness"
+        guilt     = "guilt"
+        nostalgia = "nostalgia"
+        gratitude = "gratitude"
+
+    class DemoPlanet(str, Enum):
+        ambered = "ambered"
+        rippled = "rippled"
+        spiral  = "spiral"
+        woven   = "woven"
+
+    class RitualTemplate(BaseModel):
+        status: str
+        ritual_id: str
+        ritual_type: str
+        emotion_path: List[DemoEmotion]
+        required_planet: DemoPlanet
+        script: List[dict]
+        effect_tags: List[str]
 
 router = APIRouter(tags=["rituals (stub)"])
 

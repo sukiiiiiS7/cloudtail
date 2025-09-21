@@ -224,37 +224,41 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_Text
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 660492431}
     - target: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_LineType
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_CaretWidth
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_CaretColor.b
-      value: 0.030952074
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: Send
       objectReference: {fileID: 0}
     - target: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_CaretColor.g
-      value: 0.030952074
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: CloudtailApiClient, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_CaretColor.r
-      value: 0.031446517
-      objectReference: {fileID: 0}
-    - target: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_CustomCaretColor
-      value: 1
+      propertyPath: m_OnEndEdit.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
       objectReference: {fileID: 0}
     - target: {fileID: 946089448131582938, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
       propertyPath: client
       value: 
       objectReference: {fileID: 2094989432}
+    - target: {fileID: 946089448131582938, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1253789699292740160, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -339,68 +343,25 @@ PrefabInstance:
       propertyPath: m_Name
       value: Dialog_Prefab
       objectReference: {fileID: 0}
-    - target: {fileID: 2527065876239516498, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3220040910237342370, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3274450994741364741, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_fontColor.b
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3274450994741364741, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_fontColor.g
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3274450994741364741, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_fontColor.r
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3274450994741364741, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_TextWrappingMode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3274450994741364741, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4278190080
-      objectReference: {fileID: 0}
-    - target: {fileID: 3274450994741364741, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_VerticalAlignment
-      value: 512
-      objectReference: {fileID: 0}
     - target: {fileID: 4480651331686950841, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
       propertyPath: switcher
       value: 
       objectReference: {fileID: 478310422}
-    - target: {fileID: 6955307905275941512, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_Enabled
-      value: 1
+    - target: {fileID: 5222625839946297005, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
+      propertyPath: m_text
+      value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 6955307905275941512, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_fontColor.b
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 6955307905275941512, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_fontColor.g
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 6955307905275941512, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_fontColor.r
-      value: 0.5019608
-      objectReference: {fileID: 0}
-    - target: {fileID: 6955307905275941512, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 2155905152
-      objectReference: {fileID: 0}
+    - target: {fileID: 6702838419937103204, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
+      propertyPath: api
+      value: 
+      objectReference: {fileID: 660492431}
     - target: {fileID: 7726369331823665051, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
       propertyPath: client
       value: 
       objectReference: {fileID: 2094989432}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1065515469476017154, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
@@ -821,6 +782,74 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1549626114}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &660492429
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 660492432}
+  - component: {fileID: 660492431}
+  - component: {fileID: 660492430}
+  m_Layer: 0
+  m_Name: CloudtailAPI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &660492430
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 660492429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cba092b268c36245ac315da77ab0c13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ApiSendOnEnter
+  api: {fileID: 660492431}
+  input: {fileID: 1446536166}
+  useNumpadEnter: 1
+  onlyWhenFocused: 1
+--- !u!114 &660492431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 660492429}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 775ea1f96d360774795df7dc7547094a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CloudtailApiClient
+  baseUrl: http://127.0.0.1:8020
+  input: {fileID: 1446536166}
+  logText: {fileID: 0}
+  ambered: {fileID: 1404703779}
+  rippled: {fileID: 2040204422}
+  spiral: {fileID: 555126708}
+  woven: {fileID: 414045137}
+--- !u!4 &660492432
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 660492429}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.23275, y: -0.84013, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &749361918
 GameObject:
   m_ObjectHideFlags: 0
@@ -1076,7 +1105,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3770278467767203572, guid: 2e072fc1475137d4d82b02fc0429cd6b, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1287,7 +1316,7 @@ MonoBehaviour:
 
     Left-click planet : place; Delete : undo
 
-    
+
 
 '
   m_isRightToLeft: 0
@@ -2057,6 +2086,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6144972649412571739, guid: 276305e07446eed47b9ce74044d4a081, type: 3}
   m_PrefabInstance: {fileID: 4899241471425271316}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1446536166 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 162800420030128677, guid: 0b0e8e56dd9724d4abe8aa1717fb9086, type: 3}
+  m_PrefabInstance: {fileID: 258273209}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2da0c512f12947e489f739169773d7ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TMP_InputField
 --- !u!1 &1469162885
 GameObject:
   m_ObjectHideFlags: 0
@@ -4022,3 +4062,4 @@ SceneRoots:
   - {fileID: 557659719}
   - {fileID: 1820717687}
   - {fileID: 2094989433}
+  - {fileID: 660492432}
