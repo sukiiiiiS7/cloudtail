@@ -3,9 +3,10 @@
 Unity front-end + FastAPI backend delivering a ritualized, symbolic sandbox for pet bereavement. Emphasis on **reproducibility**, **transparent limitations**, and **assessor-friendly** documentation.
 
 ---
-## 🎥 Demo
+## Demo (click for full video)
 
-[![Watch the demo](docs/demo.gif)](https://sukiiiiiS7.github.io/cloudtail/)
+[![Cloudtail demo preview](docs/demo.gif)](https://sukiiiiiS7.github.io/cloudtail/)
+
 📄 [Poster (PDF)](docs/poster.pdf)
 
 ---
