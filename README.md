@@ -3,7 +3,12 @@
 Unity front-end + FastAPI backend delivering a ritualized, symbolic sandbox for pet bereavement. Emphasis on **reproducibility**, **transparent limitations**, and **assessor-friendly** documentation.
 
 ---
+## 🎥 Demo
 
+[![Watch the demo](docs/demo.gif)](https://sukiiiiiS7.github.io/cloudtail/)
+📄 [Poster (PDF)](docs/poster.pdf)
+
+---
 ## Repository Structure
 
 ```text
@@ -11,8 +16,10 @@ Unity front-end + FastAPI backend delivering a ritualized, symbolic sandbox for 
 - backend/                           # FastAPI service (dual profiles)
 - backend/cloudtail_backend/
 - backend/cloudtail_backend/docs/    # Poster, API notes, images
+- docs/                              # GitHub Pages (demo video + index.html + poster)
 - Assets/                            # Unity project assets (demo scene, UI, scripts)
 - README.md                          # This file
+
 ```
 
 > Demo scene path (default): `Assets/Scenes/SampleScene.unity`.
@@ -23,7 +30,6 @@ Unity front-end + FastAPI backend delivering a ritualized, symbolic sandbox for 
 
 ![Cloudtail system flow](backend/cloudtail_backend/docs/images/cloudtail_flow_diagram_v2.png)
 
-- Poster (PDF): [`backend/cloudtail_backend/docs/Poster_siqi_wu.pdf`](backend/cloudtail_backend/docs/Poster_siqi_wu.pdf)
 
 ---
 
