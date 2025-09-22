@@ -23,4 +23,5 @@ backend/**/*.pyc
 backend/**/.DS_Store
 # ignore secrets
 backend/.env
-.env
+*.env
+
