@@ -7,7 +7,7 @@ Unity front-end + FastAPI backend delivering a ritualized, symbolic sandbox for 
 
 [![Cloudtail demo preview](docs/demo.gif)](https://sukiiiiiS7.github.io/cloudtail/)
 
-📄 [Poster (PDF)](backend/cloudtail_backend/docs/Poster_siqi_wu.pdf)
+📄 [Poster (PDF)](docs/Poster_siqi_wu.pdf)
 
 ---
 ## Repository Structure
@@ -16,7 +16,7 @@ Unity front-end + FastAPI backend delivering a ritualized, symbolic sandbox for 
 / (root)
 - backend/                           # FastAPI service (dual profiles)
 - backend/cloudtail_backend/
-- backend/cloudtail_backend/docs/    # Poster, API notes, images
+- backend/cloudtail_backend/docs/    # API notes, images
 - docs/                              # GitHub Pages (demo video + index.html + poster)
 - Assets/                            # Unity project assets (demo scene, UI, scripts)
 - README.md                          # This file
